@@ -39,9 +39,7 @@ public class AuthController {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getUsername(),
-                        loginRequest.getPassword()
-                )
-        );
+                        loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = tokenProvider.generateToken(authentication);
@@ -54,8 +52,7 @@ public class AuthController {
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
-                user.getRole().name()
-        ));
+                user.getRole().name()));
     }
 
     @PostMapping("/register")
@@ -70,18 +67,17 @@ public class AuthController {
                     .body("Error: Email is already in use!");
         }
 
-        // Only allow CANDIDATE role for public registration
-        // ADMIN and RECRUITER should be created by existing admins
-        if (registerRequest.getRole() != null && 
-            registerRequest.getRole() != Role.CANDIDATE) {
-            registerRequest.setRole(Role.CANDIDATE);
+        // Allow selected roles for registration, prevent CANDIDATE registration
+        Role role = registerRequest.getRole();
+        if (role == null || role == Role.CANDIDATE) {
+            role = Role.RECRUITER;
         }
 
         User user = new User();
         user.setUsername(registerRequest.getUsername());
         user.setEmail(registerRequest.getEmail());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
-        user.setRole(registerRequest.getRole() != null ? registerRequest.getRole() : Role.CANDIDATE);
+        user.setRole(role);
         user.setEnabled(true);
         user.setAccountNonExpired(true);
         user.setAccountNonLocked(true);
@@ -92,4 +88,3 @@ public class AuthController {
         return ResponseEntity.ok("User registered successfully!");
     }
 }
-

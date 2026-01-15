@@ -11,15 +11,62 @@ import Tests from './pages/Tests'
 import TestSession from './pages/TestSession'
 import TestResults from './pages/TestResults'
 import CandidateResults from './pages/CandidateResults'
+import InviteHandler from './pages/InviteHandler'
+import SuccessResults from './pages/SuccessResults'
 
 const darkTheme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#1976d2',
+      main: '#3b82f6', // Modern blue
+      light: '#60a5fa',
+      dark: '#2563eb',
     },
     secondary: {
-      main: '#dc004e',
+      main: '#ec4899', // Modern pink/fuchsia
+      light: '#f472b6',
+      dark: '#db2777',
+    },
+    background: {
+      default: '#0f172a',
+      paper: '#1e293b',
+    },
+    text: {
+      primary: '#f8fafc',
+      secondary: '#94a3b8',
+    },
+    divider: 'rgba(255, 255, 255, 0.05)',
+  },
+  typography: {
+    fontFamily: '"Outfit", "Inter", "Roboto", sans-serif',
+    h1: { fontWeight: 800 },
+    h2: { fontWeight: 700 },
+    h3: { fontWeight: 700 },
+    h4: { fontWeight: 700 },
+    h5: { fontWeight: 600 },
+    h6: { fontWeight: 600 },
+    button: {
+      textTransform: 'none',
+      fontWeight: 600,
+    },
+  },
+  shape: {
+    borderRadius: 12,
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          padding: '10px 24px',
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundImage: 'none',
+        },
+      },
     },
   },
 })
@@ -33,6 +80,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/invite/:token" element={<InviteHandler />} />
           <Route
             path="/admin/dashboard"
             element={
@@ -78,6 +126,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <CandidateResults />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/test/success/:sessionId"
+            element={
+              <ProtectedRoute>
+                <SuccessResults />
               </ProtectedRoute>
             }
           />

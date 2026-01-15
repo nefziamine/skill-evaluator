@@ -21,7 +21,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -67,19 +66,18 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
-                        
+
                         // Admin only endpoints
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        
+
                         // Recruiter endpoints
                         .requestMatchers("/api/recruiter/**").hasAnyRole("RECRUITER", "ADMIN")
-                        
+
                         // Candidate endpoints
                         .requestMatchers("/api/candidate/**").hasAnyRole("CANDIDATE", "RECRUITER", "ADMIN")
-                        
+
                         // All other requests require authentication
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -100,4 +98,3 @@ public class SecurityConfig {
         return source;
     }
 }
-

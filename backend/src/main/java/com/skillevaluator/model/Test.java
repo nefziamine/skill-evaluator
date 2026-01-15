@@ -1,5 +1,7 @@
 package com.skillevaluator.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,14 +30,12 @@ public class Test {
 
     @ManyToOne
     @JoinColumn(name = "created_by", nullable = false)
+    @JsonIgnoreProperties({ "password", "accountNonExpired", "accountNonLocked", "credentialsNonExpired", "enabled",
+            "authorities" })
     private User createdBy; // Recruiter or Admin who created the test
 
     @ManyToMany
-    @JoinTable(
-            name = "test_questions",
-            joinColumns = @JoinColumn(name = "test_id"),
-            inverseJoinColumns = @JoinColumn(name = "question_id")
-    )
+    @JoinTable(name = "test_questions", joinColumns = @JoinColumn(name = "test_id"), inverseJoinColumns = @JoinColumn(name = "question_id"))
     private List<Question> questions = new ArrayList<>();
 
     @Column(nullable = false)
@@ -53,6 +53,7 @@ public class Test {
     @Column
     private LocalDateTime updatedAt;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "test", cascade = CascadeType.ALL)
     private List<TestSession> testSessions = new ArrayList<>();
 
@@ -67,4 +68,3 @@ public class Test {
         updatedAt = LocalDateTime.now();
     }
 }
-

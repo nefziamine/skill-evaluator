@@ -104,7 +104,7 @@ function TestSession() {
         autoSubmit,
       })
       const message = `Test submitted successfully! Score: ${response.data.score}/${response.data.totalPoints}`
-      navigate('/tests', { state: { message } })
+      navigate(`/test/success/${sessionId}`)
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to submit test')
       console.error(err)
@@ -145,104 +145,104 @@ function TestSession() {
   return (
     <Layout>
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Paper elevation={3} sx={{ p: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-          <Typography variant="h5" component="h1">
-            {test.title}
-          </Typography>
-          <Typography
-            variant="h6"
-            color={timeRemaining < 300 ? 'error' : 'primary'}
-            sx={{ fontWeight: 'bold' }}
-          >
-            Time Remaining: {formatTime(timeRemaining)}
-          </Typography>
-        </Box>
-
-        <LinearProgress variant="determinate" value={progress} sx={{ mb: 3 }} />
-
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
-
-        <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            Question {currentQuestionIndex + 1} of {questions.length}
-          </Typography>
-          <Typography variant="body1" sx={{ mb: 3 }}>
-            {currentQuestion.text}
-          </Typography>
-
-          {currentQuestion.type === 'MCQ' && (
-            <FormControl component="fieldset">
-              <RadioGroup
-                value={answers[currentQuestion.id] || ''}
-                onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
-              >
-                {currentQuestion.options?.split(',').map((option, index) => (
-                  <FormControlLabel
-                    key={index}
-                    value={String.fromCharCode(65 + index)}
-                    control={<Radio />}
-                    label={option.trim()}
-                  />
-                ))}
-              </RadioGroup>
-            </FormControl>
-          )}
-
-          {currentQuestion.type === 'TRUE_FALSE' && (
-            <FormControl component="fieldset">
-              <RadioGroup
-                value={answers[currentQuestion.id] || ''}
-                onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
-              >
-                <FormControlLabel value="true" control={<Radio />} label="True" />
-                <FormControlLabel value="false" control={<Radio />} label="False" />
-              </RadioGroup>
-            </FormControl>
-          )}
-
-          {currentQuestion.type === 'SHORT_ANSWER' && (
-            <TextField
-              fullWidth
-              multiline
-              rows={4}
-              value={answers[currentQuestion.id] || ''}
-              onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
-              placeholder="Enter your answer here..."
-            />
-          )}
-        </Paper>
-
-        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Button
-            variant="outlined"
-            onClick={handlePrevious}
-            disabled={currentQuestionIndex === 0}
-          >
-            Previous
-          </Button>
-          <Box>
-            {currentQuestionIndex < questions.length - 1 ? (
-              <Button variant="contained" onClick={handleNext}>
-                Next
-              </Button>
-            ) : (
-              <Button
-                variant="contained"
-                color="success"
-                onClick={handleSubmit}
-                disabled={submitting}
-              >
-                {submitting ? <CircularProgress size={24} /> : 'Submit Test'}
-              </Button>
-            )}
+        <Paper elevation={3} sx={{ p: 4 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+            <Typography variant="h5" component="h1">
+              {test.title}
+            </Typography>
+            <Typography
+              variant="h6"
+              color={timeRemaining < 300 ? 'error' : 'primary'}
+              sx={{ fontWeight: 'bold' }}
+            >
+              Time Remaining: {formatTime(timeRemaining)}
+            </Typography>
           </Box>
-        </Box>
-      </Paper>
+
+          <LinearProgress variant="determinate" value={progress} sx={{ mb: 3 }} />
+
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
+
+          <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Question {currentQuestionIndex + 1} of {questions.length}
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 3 }}>
+              {currentQuestion.text}
+            </Typography>
+
+            {currentQuestion.type === 'MCQ' && (
+              <FormControl component="fieldset">
+                <RadioGroup
+                  value={answers[currentQuestion.id] || ''}
+                  onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
+                >
+                  {currentQuestion.options?.split(',').map((option, index) => (
+                    <FormControlLabel
+                      key={index}
+                      value={String.fromCharCode(65 + index)}
+                      control={<Radio />}
+                      label={option.trim()}
+                    />
+                  ))}
+                </RadioGroup>
+              </FormControl>
+            )}
+
+            {currentQuestion.type === 'TRUE_FALSE' && (
+              <FormControl component="fieldset">
+                <RadioGroup
+                  value={answers[currentQuestion.id] || ''}
+                  onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
+                >
+                  <FormControlLabel value="true" control={<Radio />} label="True" />
+                  <FormControlLabel value="false" control={<Radio />} label="False" />
+                </RadioGroup>
+              </FormControl>
+            )}
+
+            {currentQuestion.type === 'SHORT_ANSWER' && (
+              <TextField
+                fullWidth
+                multiline
+                rows={4}
+                value={answers[currentQuestion.id] || ''}
+                onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
+                placeholder="Enter your answer here..."
+              />
+            )}
+          </Paper>
+
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Button
+              variant="outlined"
+              onClick={handlePrevious}
+              disabled={currentQuestionIndex === 0}
+            >
+              Previous
+            </Button>
+            <Box>
+              {currentQuestionIndex < questions.length - 1 ? (
+                <Button variant="contained" onClick={handleNext}>
+                  Next
+                </Button>
+              ) : (
+                <Button
+                  variant="contained"
+                  color="success"
+                  onClick={handleSubmit}
+                  disabled={submitting}
+                >
+                  {submitting ? <CircularProgress size={24} /> : 'Submit Test'}
+                </Button>
+              )}
+            </Box>
+          </Box>
+        </Paper>
       </Container>
     </Layout>
   )

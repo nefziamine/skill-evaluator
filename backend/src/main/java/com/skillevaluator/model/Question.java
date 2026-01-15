@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,15 +41,16 @@ public class Question {
     private String options; // JSON string or comma-separated for MCQ options
 
     @Column(nullable = false, length = 500)
-    private String correctAnswer; // For MCQ: option index/letter, For True/False: "true"/"false", For Short Answer: expected answer
+    private String correctAnswer; // For MCQ: option index/letter, For True/False: "true"/"false", For Short
+                                  // Answer: expected answer
 
     @Column(length = 1000)
     private String explanation; // Explanation of the correct answer
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "questions")
     private List<Test> tests = new ArrayList<>();
 
     @Column(nullable = false)
     private Integer points = 1; // Points for this question
 }
-

@@ -6,25 +6,38 @@ import {
   Button,
   Box,
   Container,
+  alpha,
+  useTheme,
 } from '@mui/material'
-import { Assessment } from '@mui/icons-material'
+import { AutoAwesome, Logout, Dashboard } from '@mui/icons-material'
 
 function Navbar() {
   const navigate = useNavigate()
+  const theme = useTheme()
   const token = localStorage.getItem('token')
+  const role = localStorage.getItem('userRole')
 
   const handleLogout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('userRole')
     localStorage.removeItem('username')
-    navigate('/')
+    window.location.href = '/'
   }
 
   return (
-    <AppBar position="static">
+    <AppBar
+      position="sticky"
+      elevation={0}
+      sx={{
+        bgcolor: alpha('#1e293b', 0.8),
+        backdropFilter: 'blur(10px)',
+        borderBottom: '1px solid',
+        borderColor: alpha('#fff', 0.05),
+      }}
+    >
       <Container maxWidth="lg">
-        <Toolbar disableGutters sx={{ py: 1 }}>
-          <Assessment sx={{ mr: 2, fontSize: 32 }} />
+        <Toolbar disableGutters>
+          <AutoAwesome sx={{ mr: 1.5, fontSize: 28, color: 'primary.main' }} />
           <Typography
             variant="h6"
             component={Link}
@@ -32,50 +45,82 @@ function Navbar() {
             sx={{
               flexGrow: 1,
               textDecoration: 'none',
-              color: 'inherit',
-              fontWeight: 'bold',
+              color: 'white',
+              fontWeight: 800,
+              letterSpacing: '-0.02em',
+              display: 'flex',
+              alignItems: 'center'
             }}
           >
-            Skill Evaluator
+            SkillPro
           </Typography>
-          <Box sx={{ display: 'flex', gap: 2 }}>
+          <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
             {token ? (
               <>
-                {localStorage.getItem('userRole') === 'ADMIN' && (
-                  <Button color="inherit" component={Link} to="/admin/dashboard">
+                <Typography variant="body2" sx={{ color: '#94a3b8', mr: 2, display: { xs: 'none', md: 'block' } }}>
+                  Logged in as <span style={{ color: 'white', fontWeight: 600 }}>{role}</span>
+                </Typography>
+                {role === 'ADMIN' && (
+                  <Button
+                    startIcon={<Dashboard />}
+                    color="inherit"
+                    component={Link}
+                    to="/admin/dashboard"
+                    sx={{ textTransform: 'none', fontWeight: 600 }}
+                  >
                     Admin
                   </Button>
                 )}
-                {(localStorage.getItem('userRole') === 'RECRUITER' ||
-                  localStorage.getItem('userRole') === 'ADMIN') && (
+                {role === 'RECRUITER' && (
                   <Button
+                    startIcon={<Dashboard />}
                     color="inherit"
                     component={Link}
                     to="/recruiter/dashboard"
+                    sx={{ textTransform: 'none', fontWeight: 600 }}
                   >
                     Recruiter
                   </Button>
                 )}
-                <Button color="inherit" component={Link} to="/tests">
-                  Tests
-                </Button>
-                <Button color="inherit" onClick={handleLogout}>
+                <Button
+                  onClick={handleLogout}
+                  variant="outlined"
+                  color="inherit"
+                  startIcon={<Logout />}
+                  size="small"
+                  sx={{
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    borderColor: alpha('#fff', 0.2),
+                    '&:hover': { borderColor: 'white' }
+                  }}
+                >
                   Logout
                 </Button>
               </>
             ) : (
               <>
-                <Button color="inherit" component={Link} to="/login">
+                <Button
+                  color="inherit"
+                  component={Link}
+                  to="/login"
+                  sx={{ textTransform: 'none', fontWeight: 600 }}
+                >
                   Login
                 </Button>
                 <Button
                   variant="contained"
-                  color="secondary"
+                  color="primary"
                   component={Link}
                   to="/register"
-                  sx={{ ml: 1 }}
+                  sx={{
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    borderRadius: 2,
+                    boxShadow: 'none'
+                  }}
                 >
-                  Sign Up
+                  Get Started
                 </Button>
               </>
             )}

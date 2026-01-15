@@ -8,263 +8,426 @@ import {
   Card,
   CardContent,
   Paper,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
+  Stack,
+  Fade,
+  useTheme,
+  alpha,
 } from '@mui/material'
 import {
-  Assessment,
+  AdminPanelSettings,
+  Work,
+  AssignmentTurnedIn,
+  Email,
+  Smartphone,
+  AutoAwesome,
   Security,
-  Speed,
-  Analytics,
-  Quiz,
-  Timer,
   BarChart,
-  People,
 } from '@mui/icons-material'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
 function Home() {
+  const theme = useTheme()
+
   const features = [
     {
-      icon: <Quiz />,
-      title: 'Multiple Question Types',
-      description:
-        'Support for MCQ, True/False, and Short Answer questions to assess various skills comprehensively.',
-    },
-    {
-      icon: <Timer />,
-      title: 'Time-Limited Tests',
-      description:
-        'Automated time management with automatic submission when time expires.',
+      icon: <AutoAwesome />,
+      title: 'Automated Grading',
+      description: 'Instant evaluation and scoring for technical assessments.',
     },
     {
       icon: <Security />,
-      title: 'Secure & Fair',
-      description:
-        'Question randomization and secure session management ensure fair assessments.',
+      title: 'Secure Environment',
+      description: 'Safe and fair testing environment for all candidates.',
     },
     {
       icon: <BarChart />,
-      title: 'Automatic Scoring',
-      description:
-        'Instant score calculation and detailed analytics for recruiters.',
-    },
-    {
-      icon: <People />,
-      title: 'Role-Based Access',
-      description:
-        'Separate interfaces for Admins, Recruiters, and Candidates with appropriate permissions.',
-    },
-    {
-      icon: <Analytics />,
-      title: 'Candidate Comparison',
-      description:
-        'Compare candidate performance with comprehensive reporting and analytics.',
-    },
-  ]
-
-  const roles = [
-    {
-      title: 'For Candidates',
-      description:
-        'Take skill assessments in a user-friendly interface. View your results and track your progress.',
-      features: [
-        'Easy-to-use test interface',
-        'Real-time countdown timer',
-        'View your test history',
-        'Detailed result breakdown',
-      ],
-      color: 'primary',
-    },
-    {
-      title: 'For Recruiters',
-      description:
-        'Create tests, manage question banks, and evaluate candidates efficiently.',
-      features: [
-        'Create custom tests',
-        'Manage question bank',
-        'View candidate results',
-        'Analytics dashboard',
-      ],
-      color: 'secondary',
-    },
-    {
-      title: 'For Administrators',
-      description:
-        'Full system control with user management and platform configuration.',
-      features: [
-        'User management',
-        'System statistics',
-        'Role assignment',
-        'Platform configuration',
-      ],
-      color: 'error',
+      title: 'Detailed Analytics',
+      description: 'Comprehensive insights into candidate performance.',
     },
   ]
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <Box sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      minHeight: '100vh',
+      bgcolor: '#0f172a', // Deep dark background
+      color: 'white',
+      overflowX: 'hidden'
+    }}>
       <Navbar />
+
       <Box component="main" sx={{ flexGrow: 1 }}>
         {/* Hero Section */}
         <Box
           sx={{
-            bgcolor: 'primary.main',
-            color: 'primary.contrastText',
-            py: 10,
-            textAlign: 'center',
+            position: 'relative',
+            pt: { xs: 8, md: 15 },
+            pb: { xs: 8, md: 12 },
+            background: 'radial-gradient(circle at 50% -20%, #1e293b 0%, #0f172a 100%)',
+            overflow: 'hidden'
           }}
         >
-          <Container maxWidth="lg">
-            <Typography variant="h2" component="h1" gutterBottom fontWeight="bold">
-              Skill Evaluator Platform
-            </Typography>
-            <Typography variant="h5" sx={{ mb: 4, opacity: 0.9 }}>
-              Automated Technical Assessment Platform for Modern Recruitment
-            </Typography>
-            <Typography variant="body1" sx={{ mb: 4, maxWidth: 600, mx: 'auto' }}>
-              Streamline your hiring process with our comprehensive skill
-              evaluation system. Create tests, assess candidates, and make
-              data-driven hiring decisions.
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+          {/* Animated Background Elements */}
+          <Box sx={{
+            position: 'absolute',
+            top: '10%',
+            left: '5%',
+            width: '300px',
+            height: '300px',
+            bgcolor: alpha(theme.palette.primary.main, 0.1),
+            borderRadius: '50%',
+            filter: 'blur(80px)',
+            zIndex: 0
+          }} />
+          <Box sx={{
+            position: 'absolute',
+            bottom: '10%',
+            right: '5%',
+            width: '400px',
+            height: '400px',
+            bgcolor: alpha(theme.palette.secondary.main, 0.1),
+            borderRadius: '50%',
+            filter: 'blur(100px)',
+            zIndex: 0
+          }} />
+
+          <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+            <Fade in timeout={1000}>
+              <Box textAlign="center">
+                <Typography
+                  variant="h1"
+                  sx={{
+                    fontSize: { xs: '3rem', md: '4.5rem' },
+                    fontWeight: 800,
+                    mb: 2,
+                    background: 'linear-gradient(135deg, #fff 0%, #94a3b8 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    letterSpacing: '-0.02em'
+                  }}
+                >
+                  Skill Evaluator Pro
+                </Typography>
+                <Typography
+                  variant="h5"
+                  sx={{
+                    mb: 5,
+                    color: '#94a3b8',
+                    maxWidth: '800px',
+                    mx: 'auto',
+                    fontWeight: 400,
+                    lineHeight: 1.6
+                  }}
+                >
+                  The sophisticated platform for technical talent assessment.
+                  Streamline your recruitment with data-driven precision.
+                </Typography>
+
+                {localStorage.getItem('token') && (
+                  <Button
+                    component={Link}
+                    to={localStorage.getItem('userRole') === 'ADMIN' ? '/admin/dashboard' : '/recruiter/dashboard'}
+                    variant="contained"
+                    size="large"
+                    startIcon={<AutoAwesome />}
+                    sx={{
+                      py: 2,
+                      px: 6,
+                      borderRadius: 3,
+                      fontSize: '1.2rem',
+                      fontWeight: 700,
+                      textTransform: 'none',
+                      background: 'linear-gradient(90deg, #3b82f6 0%, #2563eb 100%)',
+                      boxShadow: '0 10px 30px -10px rgba(59, 130, 246, 0.5)'
+                    }}
+                  >
+                    Go to My Dashboard
+                  </Button>
+                )}
+
+                <Grid container spacing={4} justifyContent="center" sx={{ mt: 6 }}>
+                  {features.map((f, i) => (
+                    <Grid item xs={12} md={4} key={i}>
+                      <Box sx={{
+                        p: 3,
+                        borderRadius: 4,
+                        bgcolor: alpha('#1e293b', 0.5),
+                        backdropFilter: 'blur(10px)',
+                        border: '1px solid',
+                        borderColor: alpha('#ffffff', 0.1),
+                        height: '100%',
+                        transition: 'transform 0.3s ease',
+                        '&:hover': { transform: 'translateY(-5px)' }
+                      }}>
+                        <Box sx={{ color: 'primary.light', mb: 2 }}>{f.icon}</Box>
+                        <Typography variant="h6" sx={{ color: 'white', mb: 1 }}>{f.title}</Typography>
+                        <Typography variant="body2" sx={{ color: '#94a3b8' }}>{f.description}</Typography>
+                      </Box>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Box>
+            </Fade>
+          </Container>
+        </Box>
+
+        {/* Conditional Management / Portal Section */}
+        {localStorage.getItem('token') ? (
+          <Container maxWidth="lg" sx={{ py: 12 }}>
+            <Box
+              sx={{
+                p: 6,
+                borderRadius: 8,
+                background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+                border: '1px solid',
+                borderColor: alpha('#fff', 0.05),
+                textAlign: 'center',
+                boxShadow: '0 20px 50px rgba(0,0,0,0.3)'
+              }}
+            >
+              <Typography variant="h3" sx={{ fontWeight: 800, mb: 2 }}>
+                Welcome Back, {localStorage.getItem('username') || 'Professional'}
+              </Typography>
+              <Typography variant="h6" sx={{ color: '#94a3b8', mb: 6, maxWidth: '600px', mx: 'auto' }}>
+                Your management dashboard is ready. Continue overseeing evaluations or manage system configurations.
+              </Typography>
+
+              <Grid container spacing={4} justifyContent="center">
+                <Grid item xs={12} md={4}>
+                  <Box sx={{ p: 3, bgcolor: alpha('#fff', 0.02), borderRadius: 4, border: '1px solid', borderColor: alpha('#fff', 0.05) }}>
+                    <Typography variant="h4" color="primary" sx={{ fontWeight: 800 }}>{localStorage.getItem('userRole') === 'ADMIN' ? '100%' : 'Active'}</Typography>
+                    <Typography variant="body2" color="textSecondary">System Status</Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <Box sx={{ p: 3, bgcolor: alpha('#fff', 0.02), borderRadius: 4, border: '1px solid', borderColor: alpha('#fff', 0.05) }}>
+                    <Typography variant="h4" sx={{ fontWeight: 800 }}>Ready</Typography>
+                    <Typography variant="body2" color="textSecondary">Evaluation Engine</Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <Box sx={{ p: 3, bgcolor: alpha('#fff', 0.02), borderRadius: 4, border: '1px solid', borderColor: alpha('#fff', 0.05) }}>
+                    <Typography variant="h4" color="secondary" sx={{ fontWeight: 800 }}>Secure</Typography>
+                    <Typography variant="body2" color="textSecondary">Data Protection</Typography>
+                  </Box>
+                </Grid>
+              </Grid>
+
               <Button
-                variant="contained"
-                color="secondary"
-                size="large"
                 component={Link}
-                to="/register"
-                sx={{ px: 4 }}
-              >
-                Get Started
-              </Button>
-              <Button
+                to={localStorage.getItem('userRole') === 'ADMIN' ? '/admin/dashboard' : '/recruiter/dashboard'}
                 variant="outlined"
-                color="inherit"
                 size="large"
-                component={Link}
-                to="/login"
-                sx={{ px: 4 }}
+                sx={{
+                  mt: 6,
+                  px: 8,
+                  py: 2,
+                  borderRadius: 3,
+                  fontWeight: 700,
+                  borderColor: alpha('#fff', 0.2),
+                  color: 'white',
+                  '&:hover': { borderColor: 'white', bgcolor: alpha('#fff', 0.05) }
+                }}
               >
-                Login
+                Access {localStorage.getItem('userRole')} Panel
               </Button>
             </Box>
           </Container>
-        </Box>
-
-        {/* Features Section */}
-        <Container maxWidth="lg" sx={{ py: 8 }}>
-          <Typography variant="h3" component="h2" align="center" gutterBottom>
-            Key Features
-          </Typography>
-          <Typography
-            variant="body1"
-            color="text.secondary"
-            align="center"
-            sx={{ mb: 6 }}
-          >
-            Everything you need for efficient technical recruitment
-          </Typography>
-          <Grid container spacing={4}>
-            {features.map((feature, index) => (
-              <Grid item xs={12} sm={6} md={4} key={index}>
-                <Card sx={{ height: '100%' }}>
-                  <CardContent>
-                    <Box sx={{ color: 'primary.main', mb: 2 }}>
-                      {feature.icon}
-                    </Box>
-                    <Typography variant="h6" gutterBottom>
-                      {feature.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {feature.description}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </Container>
-
-        {/* Roles Section */}
-        <Box sx={{ bgcolor: 'background.default', py: 8 }}>
-          <Container maxWidth="lg">
-            <Typography variant="h3" component="h2" align="center" gutterBottom>
-              Designed for Everyone
-            </Typography>
+        ) : (
+          <Container maxWidth="lg" sx={{ py: 12 }}>
             <Typography
-              variant="body1"
-              color="text.secondary"
+              variant="h3"
               align="center"
-              sx={{ mb: 6 }}
+              sx={{ mb: 8, fontWeight: 700, color: 'white' }}
             >
-              Tailored interfaces for different user roles
+              Access Your Workspace
             </Typography>
-            <Grid container spacing={4}>
-              {roles.map((role, index) => (
-                <Grid item xs={12} md={4} key={index}>
-                  <Paper
-                    elevation={3}
+
+            <Grid container spacing={6} justifyContent="center">
+              {/* Recruiter Portal */}
+              <Grid item xs={12} md={5}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 6,
+                    height: '100%',
+                    borderRadius: 6,
+                    bgcolor: alpha('#1e293b', 0.4),
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid',
+                    borderColor: alpha(theme.palette.primary.main, 0.2),
+                    textAlign: 'center',
+                    transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                    '&:hover': {
+                      borderColor: theme.palette.primary.main,
+                      boxShadow: `0 0 40px ${alpha(theme.palette.primary.main, 0.2)}`,
+                      transform: 'scale(1.02)'
+                    }
+                  }}
+                >
+                  <Work sx={{ fontSize: 60, color: 'primary.main', mb: 3 }} />
+                  <Typography variant="h4" sx={{ mb: 2, fontWeight: 700 }}>Recruiter</Typography>
+                  <Typography sx={{ color: '#94a3b8', mb: 4, minHeight: '60px' }}>
+                    Manage question banks, create tests, and analyze candidate performance with our advanced dashboard.
+                  </Typography>
+                  <Button
+                    component={Link}
+                    to="/login?role=RECRUITER"
+                    variant="contained"
+                    fullWidth
+                    size="large"
                     sx={{
-                      p: 3,
-                      height: '100%',
-                      borderTop: 4,
-                      borderColor: `${role.color}.main`,
+                      py: 1.5,
+                      mb: 2,
+                      borderRadius: 3,
+                      fontSize: '1rem',
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      boxShadow: '0 10px 20px -10px rgba(59, 130, 246, 0.5)'
                     }}
                   >
-                    <Typography variant="h5" gutterBottom color={`${role.color}.main`}>
-                      {role.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                      {role.description}
-                    </Typography>
-                    <List dense>
-                      {role.features.map((feature, idx) => (
-                        <ListItem key={idx} disableGutters>
-                          <ListItemIcon sx={{ minWidth: 36 }}>
-                            <Speed fontSize="small" color={role.color} />
-                          </ListItemIcon>
-                          <ListItemText primary={feature} />
-                        </ListItem>
-                      ))}
-                    </List>
-                  </Paper>
-                </Grid>
-              ))}
+                    Recruiter Login
+                  </Button>
+                  <Button
+                    component={Link}
+                    to="/register?role=RECRUITER"
+                    variant="outlined"
+                    fullWidth
+                    size="large"
+                    sx={{
+                      py: 1.5,
+                      borderRadius: 3,
+                      fontSize: '1rem',
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      color: 'primary.light',
+                      borderColor: alpha(theme.palette.primary.main, 0.5),
+                      '&:hover': { borderColor: 'primary.main', bgcolor: alpha(theme.palette.primary.main, 0.05) }
+                    }}
+                  >
+                    Register as Recruiter
+                  </Button>
+                </Paper>
+              </Grid>
+
+              {/* Admin Portal */}
+              <Grid item xs={12} md={5}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 6,
+                    height: '100%',
+                    borderRadius: 6,
+                    bgcolor: alpha('#1e293b', 0.4),
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid',
+                    borderColor: alpha(theme.palette.secondary.main, 0.2),
+                    textAlign: 'center',
+                    transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                    '&:hover': {
+                      borderColor: theme.palette.secondary.main,
+                      boxShadow: `0 0 40px ${alpha(theme.palette.secondary.main, 0.2)}`,
+                      transform: 'scale(1.02)'
+                    }
+                  }}
+                >
+                  <AdminPanelSettings sx={{ fontSize: 60, color: 'secondary.main', mb: 3 }} />
+                  <Typography variant="h4" sx={{ mb: 2, fontWeight: 700 }}>Administrator</Typography>
+                  <Typography sx={{ color: '#94a3b8', mb: 4, minHeight: '60px' }}>
+                    Full system control, user management, and platform configuration for organizational oversight.
+                  </Typography>
+                  <Button
+                    component={Link}
+                    to="/login?role=ADMIN"
+                    variant="contained"
+                    color="secondary"
+                    fullWidth
+                    size="large"
+                    sx={{
+                      py: 1.5,
+                      mb: 2,
+                      borderRadius: 3,
+                      fontSize: '1rem',
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      boxShadow: '0 10px 20px -10px rgba(236, 72, 153, 0.5)'
+                    }}
+                  >
+                    Admin Login
+                  </Button>
+                  <Button
+                    component={Link}
+                    to="/register?role=ADMIN"
+                    variant="outlined"
+                    color="secondary"
+                    fullWidth
+                    size="large"
+                    sx={{
+                      py: 1.5,
+                      borderRadius: 3,
+                      fontSize: '1rem',
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      color: 'secondary.light',
+                      borderColor: alpha(theme.palette.secondary.main, 0.5),
+                      '&:hover': { borderColor: 'secondary.main', bgcolor: alpha(theme.palette.secondary.main, 0.05) }
+                    }}
+                  >
+                    Register as Admin
+                  </Button>
+                </Paper>
+              </Grid>
             </Grid>
           </Container>
-        </Box>
+        )}
 
-        {/* CTA Section */}
-        <Box
-          sx={{
-            bgcolor: 'primary.main',
-            color: 'primary.contrastText',
-            py: 8,
-            textAlign: 'center',
-          }}
-        >
+        {/* Candidate Info Section */}
+        <Box sx={{ bgcolor: alpha('#1e293b', 0.3), py: 12 }}>
           <Container maxWidth="md">
-            <Typography variant="h4" component="h2" gutterBottom>
-              Ready to Get Started?
-            </Typography>
-            <Typography variant="body1" sx={{ mb: 4, opacity: 0.9 }}>
-              Join thousands of companies using Skill Evaluator to streamline
-              their recruitment process.
-            </Typography>
-            <Button
-              variant="contained"
-              color="secondary"
-              size="large"
-              component={Link}
-              to="/register"
-              sx={{ px: 4, py: 1.5 }}
+            <Paper
+              elevation={0}
+              sx={{
+                p: { xs: 4, md: 8 },
+                borderRadius: 8,
+                background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+                border: '1px solid',
+                borderColor: alpha('#fff', 0.05),
+                textAlign: 'center'
+              }}
             >
-              Create Your Account
-            </Button>
+              <AssignmentTurnedIn sx={{ fontSize: 48, color: '#10b981', mb: 3 }} />
+              <Typography variant="h4" sx={{ mb: 3, fontWeight: 700 }}>For Candidates</Typography>
+              <Typography variant="h6" sx={{ color: '#94a3b8', mb: 5, fontWeight: 400 }}>
+                Are you here to take a test? Candidates do not need to create an account.
+              </Typography>
+
+              <Grid container spacing={4}>
+                <Grid item xs={12} md={6}>
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: alpha('#10b981', 0.1), color: '#10b981' }}>
+                      <Email />
+                    </Box>
+                    <Box textAlign="left">
+                      <Typography variant="subtitle1" fontWeight={600}>Email Invitation</Typography>
+                      <Typography variant="body2" sx={{ color: '#94a3b8' }}>Check your email for a unique test link.</Typography>
+                    </Box>
+                  </Stack>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: alpha('#10b981', 0.1), color: '#10b981' }}>
+                      <Smartphone />
+                    </Box>
+                    <Box textAlign="left">
+                      <Typography variant="subtitle1" fontWeight={600}>SMS Notification</Typography>
+                      <Typography variant="body2" sx={{ color: '#94a3b8' }}>Get instant results and updates via SMS.</Typography>
+                    </Box>
+                  </Stack>
+                </Grid>
+              </Grid>
+            </Paper>
           </Container>
         </Box>
       </Box>

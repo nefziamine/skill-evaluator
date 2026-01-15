@@ -29,8 +29,13 @@ public class JwtTokenProvider {
         String username = authentication.getName();
         String roles = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
+                .map(role -> role.replace("ROLE_", "")) // Strip ROLE_ prefix
                 .collect(Collectors.joining(","));
 
+        return generateToken(username, roles);
+    }
+
+    public String generateToken(String username, String roles) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
 
@@ -73,4 +78,3 @@ public class JwtTokenProvider {
         }
     }
 }
-

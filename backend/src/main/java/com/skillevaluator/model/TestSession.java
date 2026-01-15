@@ -47,7 +47,9 @@ public class TestSession {
     @Column(length = 10000)
     private String answers; // JSON string storing candidate's answers
 
+    @Column(length = 2000)
+    private String skillBreakdown; // JSON string storing skill category scores
+
     @Column(length = 1000)
     private String status; // "IN_PROGRESS", "COMPLETED", "EXPIRED", "SUBMITTED"
 }
-

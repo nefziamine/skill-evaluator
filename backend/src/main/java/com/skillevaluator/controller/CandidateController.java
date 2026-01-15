@@ -39,11 +39,11 @@ public class CandidateController {
     public ResponseEntity<TestSessionResponse> startTest(
             @PathVariable Long testId,
             Authentication authentication) {
-        
+
         String username = authentication.getName();
         TestSession session = testService.startTestSession(testId, username);
         List<Question> questions = testService.getRandomizedQuestions(testId);
-        
+
         // Remove correct answers from questions before sending to client
         questions.forEach(q -> {
             q.setCorrectAnswer(null);
@@ -53,15 +53,13 @@ public class CandidateController {
         // Calculate time remaining in seconds
         long secondsRemaining = Duration.between(
                 LocalDateTime.now(),
-                session.getExpiresAt()
-        ).getSeconds();
+                session.getExpiresAt()).getSeconds();
 
         TestSessionResponse response = new TestSessionResponse(
                 session.getTest(),
                 questions,
                 session.getId(),
-                (int) Math.max(0, secondsRemaining)
-        );
+                (int) Math.max(0, secondsRemaining));
 
         return ResponseEntity.ok(response);
     }
@@ -71,9 +69,9 @@ public class CandidateController {
             @PathVariable Long testId,
             @RequestBody TestSubmissionRequest submissionRequest,
             Authentication authentication) {
-        
+
         String username = authentication.getName();
-        
+
         // Find the active session for this test and user
         com.skillevaluator.model.User candidate = (com.skillevaluator.model.User) authentication.getPrincipal();
         Test test = testService.getTestById(testId);
@@ -87,14 +85,12 @@ public class CandidateController {
                 session.getId(),
                 submissionRequest.getAnswers(),
                 username,
-                submissionRequest.getAutoSubmit() != null && submissionRequest.getAutoSubmit()
-        );
+                submissionRequest.getAutoSubmit() != null && submissionRequest.getAutoSubmit());
 
         return ResponseEntity.ok(Map.of(
                 "message", "Test submitted successfully",
                 "score", completedSession.getScore(),
-                "totalPoints", completedSession.getTotalPoints()
-        ));
+                "totalPoints", completedSession.getTotalPoints()));
     }
 
     @GetMapping("/sessions")
@@ -107,14 +103,14 @@ public class CandidateController {
     @GetMapping("/sessions/{sessionId}/result")
     public ResponseEntity<?> getSessionResult(@PathVariable Long sessionId, Authentication authentication) {
         User candidate = (User) authentication.getPrincipal();
-        Optional<TestSession> sessionOpt = testSessionRepository.findById(sessionId);
-        
+        Optional<TestSession> sessionOpt = testSessionRepository.findById(java.util.Objects.requireNonNull(sessionId));
+
         if (sessionOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
         TestSession session = sessionOpt.get();
-        
+
         // Verify the session belongs to the current user
         if (!session.getCandidate().getId().equals(candidate.getId())) {
             return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
@@ -131,8 +127,18 @@ public class CandidateController {
                 "totalPoints", session.getTotalPoints(),
                 "percentage", (session.getScore() * 100.0 / session.getTotalPoints()),
                 "submittedAt", session.getSubmittedAt(),
-                "status", session.getStatus()
-        ));
+                "status", session.getStatus()));
+    }
+
+    @GetMapping("/sessions/{sessionId}/rank")
+    public ResponseEntity<?> getSessionRank(@PathVariable Long sessionId, Authentication authentication) {
+        User candidate = (User) authentication.getPrincipal();
+        Optional<TestSession> sessionOpt = testSessionRepository.findById(sessionId);
+
+        if (sessionOpt.isEmpty() || !sessionOpt.get().getCandidate().getId().equals(candidate.getId())) {
+            return ResponseEntity.status(403).body(Map.of("error", "Access denied"));
+        }
+
+        return ResponseEntity.ok(testService.getCandidateRank(sessionId));
     }
 }
-
