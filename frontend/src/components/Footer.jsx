@@ -16,7 +16,7 @@ function Footer() {
         <Grid container spacing={4}>
           <Grid item xs={12} sm={4}>
             <Typography variant="h6" sx={{ color: 'white', fontWeight: 700, mb: 2 }}>
-              SkillPro
+              Skill Evaluator
             </Typography>
             <Typography variant="body2" sx={{ color: '#94a3b8', lineHeight: 1.7 }}>
               The definitive platform for technical assessment.
@@ -53,7 +53,7 @@ function Footer() {
         </Grid>
         <Box sx={{ mt: 8, pt: 4, borderTop: '1px solid', borderColor: alpha('#fff', 0.05) }}>
           <Typography variant="body2" sx={{ color: '#64748b' }} align="center">
-            © {new Date().getFullYear()} SkillPro Evaluation System. Excellence in Assessment.
+            © {new Date().getFullYear()} Skill Evaluator System. Excellence in Assessment.
           </Typography>
         </Box>
       </Container>

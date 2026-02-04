@@ -52,7 +52,7 @@ function Navbar() {
               alignItems: 'center'
             }}
           >
-            SkillPro
+            Skill Evaluator
           </Typography>
           <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
             {token ? (

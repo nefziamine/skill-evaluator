@@ -54,10 +54,10 @@ function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState('')
   const [activeTab, setActiveTab] = useState(0)
   const [systemSettings, setSystemSettings] = useState({
-    platformName: 'Skill Pro',
+    platformName: 'Skill Evaluator',
     allowNewRegistrations: true,
     maintenanceMode: false,
-    contactEmail: 'admin@skillpro.com'
+    contactEmail: 'admin@skillevaluator.com'
   })
   const [diagnostics, setDiagnostics] = useState({
     status: 'Healthy',
