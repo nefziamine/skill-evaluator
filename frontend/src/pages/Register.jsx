@@ -103,11 +103,11 @@ function Register() {
         <Box sx={{ width: '100%' }}>
           <Button
             component={Link}
-            to="/login"
+            to="/"
             startIcon={<ArrowBack />}
             sx={{ mb: 4, color: '#94a3b8', textTransform: 'none' }}
           >
-            Back to Login
+            Back to Home
           </Button>
 
           <Paper
@@ -243,33 +243,7 @@ function Register() {
                 }}
               />
 
-              <FormControl fullWidth margin="normal" required sx={{
-                '& .MuiOutlinedInput-root': {
-                  color: 'white',
-                  '& fieldset': { borderColor: alpha('#fff', 0.2) },
-                  '&:hover fieldset': { borderColor: alpha('#fff', 0.3) },
-                },
-                '& .MuiInputLabel-root': { color: '#94a3b8', '&.Mui-focused': { color: 'primary.main' } },
-                '& .MuiSelect-icon': { color: '#94a3b8' }
-              }}>
-                <InputLabel id="role-label">Register As</InputLabel>
-                <Select
-                  labelId="role-label"
-                  id="role"
-                  name="role"
-                  value={formData.role}
-                  label="Register As"
-                  onChange={handleChange}
-                  MenuProps={{
-                    PaperProps: {
-                      sx: { bgcolor: '#1e293b', color: 'white', border: '1px solid #334155' }
-                    }
-                  }}
-                >
-                  <MenuItem value="RECRUITER">Recruiter</MenuItem>
-                  <MenuItem value="ADMIN">Administrator</MenuItem>
-                </Select>
-              </FormControl>
+              {/* Register As section hidden as per request */}
 
               <Button
                 type="submit"

@@ -31,11 +31,11 @@ import {
   Tab,
   FormControlLabel,
   alpha,
+  InputAdornment
 } from '@mui/material'
 import { Add, Edit, Delete, Refresh, Search, Settings, People, Dashboard as DashboardIcon, Quiz, Description, Assessment } from '@mui/icons-material'
 import Layout from '../components/Layout'
 import api from '../services/api'
-import { InputAdornment } from '@mui/material'
 
 function AdminDashboard() {
   const [users, setUsers] = useState([])
@@ -190,37 +190,14 @@ function AdminDashboard() {
       }, 500)
     } catch (err) {
       console.error('Submission error:', err)
-
-      // Handle Spring Boot validation errors
-      if (err.response?.status === 400 || err.response?.status === 403) {
-        const errorData = err.response?.data
-
-        // Check if it's a Spring validation error with field errors
-        if (typeof errorData === 'string' && errorData.includes('Username must be')) {
-          setError('Username must be between 3 and 50 characters')
-        } else if (typeof errorData === 'string' && errorData.includes('Email')) {
-          setError('Please provide a valid email address')
-        } else if (typeof errorData === 'string' && errorData.includes('Password')) {
-          setError('Password must be at least 6 characters')
-        } else {
-          // Generic error message extraction
-          const msg = errorData?.error || errorData?.message || errorData || 'Operation failed. Please check your input.'
-          setError(msg)
-        }
-      } else {
-        const msg = err.response?.data?.error || err.response?.data?.message || 'Operation failed'
-        setError(msg)
-      }
+      setError(err.response?.data?.error || err.response?.data?.message || 'Operation failed')
     } finally {
       setSubmitting(false)
     }
   }
 
   const handleDelete = async (userId) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) {
-      return
-    }
-
+    if (!window.confirm('Are you sure you want to delete this user?')) return
     try {
       await api.delete(`/admin/users/${userId}`)
       setSuccess('User deleted successfully!')
@@ -259,31 +236,49 @@ function AdminDashboard() {
 
   return (
     <Layout>
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, alignItems: 'center' }}>
-          <Typography variant="h4" component="h1" sx={{ fontWeight: 700, color: 'primary.main' }}>
+          <Typography variant="h4" component="h1" sx={{
+            fontWeight: 800,
+            background: 'linear-gradient(to right, #60a5fa, #3b82f6)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}>
             System Administration
           </Typography>
           <Box>
-            <IconButton onClick={() => { fetchUsers(); fetchStats(); }} sx={{ mr: 1 }}>
+            <IconButton onClick={() => { fetchUsers(); fetchStats(); }} sx={{ mr: 1, color: '#94a3b8' }}>
               <Refresh />
             </IconButton>
             <Button
               variant="contained"
               startIcon={<Add />}
               onClick={() => handleOpenDialog()}
-              sx={{ borderRadius: 2, px: 3 }}
+              sx={{ borderRadius: 2, px: 3, fontWeight: 700 }}
             >
               New User
             </Button>
           </Box>
         </Box>
 
-        <Paper sx={{ mb: 4, borderRadius: 2 }}>
+        <Paper sx={{
+          mb: 4,
+          borderRadius: 4,
+          bgcolor: alpha('#1e293b', 0.4),
+          backdropFilter: 'blur(20px)',
+          border: '1px solid',
+          borderColor: alpha('#fff', 0.05),
+          overflow: 'hidden'
+        }}>
           <Tabs
             value={activeTab}
             onChange={(e, v) => setActiveTab(v)}
-            sx={{ borderBottom: 1, borderColor: 'divider' }}
+            sx={{
+              borderBottom: 1,
+              borderColor: alpha('#fff', 0.05),
+              '& .MuiTab-root': { color: '#94a3b8', fontWeight: 600, py: 2 },
+              '& .Mui-selected': { color: 'white' }
+            }}
           >
             <Tab icon={<DashboardIcon />} label="Overview" iconPosition="start" />
             <Tab icon={<People />} label="User Management" iconPosition="start" />
@@ -295,42 +290,57 @@ function AdminDashboard() {
           <>
             <Grid container spacing={3} sx={{ mb: 4 }}>
               {[
-                { label: 'Total Users', value: stats.totalUsers, color: '#1976d2', icon: <People /> },
-                { label: 'Admins', value: stats.admins, color: '#d32f2f', icon: <Settings /> },
-                { label: 'Recruiters', value: stats.recruiters, color: '#ed6c02', icon: <People /> },
-                { label: 'Candidates', value: stats.candidates, color: '#2e7d32', icon: <People /> },
-                { label: 'Total Tests', value: stats.totalTests, color: '#0288d1', icon: <Quiz /> },
-                { label: 'Questions', value: stats.totalQuestions, color: '#7b1fa2', icon: <Description /> },
-                { label: 'Assessments', value: stats.totalSessions, color: '#388e3c', icon: <Assessment /> },
+                { label: 'Total Users', value: stats.totalUsers, color: '#3b82f6', icon: <People /> },
+                { label: 'Admins', value: stats.admins, color: '#ef4444', icon: <Settings /> },
+                { label: 'Recruiters', value: stats.recruiters, color: '#f59e0b', icon: <People /> },
+                { label: 'Candidates', value: stats.candidates, color: '#10b981', icon: <People /> },
+                { label: 'Total Tests', value: stats.totalTests, color: '#8b5cf6', icon: <Quiz /> },
+                { label: 'Questions', value: stats.totalQuestions, color: '#ec4899', icon: <Description /> },
+                { label: 'Assessments', value: stats.totalSessions, color: '#10b981', icon: <Assessment /> },
               ].map((stat, index) => (
                 <Grid item xs={12} sm={6} md={3} key={index}>
-                  <Card sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.08)', height: '100%' }}>
+                  <Card sx={{
+                    borderRadius: 4,
+                    bgcolor: alpha('#1e293b', 0.5),
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid',
+                    borderColor: alpha('#fff', 0.1),
+                    height: '100%',
+                    transition: 'transform 0.2s',
+                    '&:hover': { transform: 'translateY(-5px)' }
+                  }}>
                     <CardContent>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                        <Typography color="textSecondary" variant="overline" sx={{ fontWeight: 600 }}>
+                        <Typography variant="overline" sx={{ fontWeight: 700, color: '#94a3b8' }}>
                           {stat.label}
                         </Typography>
                         <Box sx={{ color: stat.color }}>{stat.icon}</Box>
                       </Box>
-                      <Typography variant="h3" sx={{ fontWeight: 800 }}>{stat.value || 0}</Typography>
+                      <Typography variant="h3" sx={{ fontWeight: 800, color: 'white' }}>{stat.value || 0}</Typography>
                     </CardContent>
                   </Card>
                 </Grid>
               ))}
             </Grid>
 
-            {/* Quick Actions or Recent Activity could go here */}
-            <Paper sx={{ p: 3, borderRadius: 3 }}>
-              <Typography variant="h6" gutterBottom>Administrative Tasks</Typography>
-              <Grid container spacing={2}>
+            <Paper sx={{
+              p: 4,
+              borderRadius: 4,
+              bgcolor: alpha('#1e293b', 0.4),
+              backdropFilter: 'blur(20px)',
+              border: '1px solid',
+              borderColor: alpha('#fff', 0.05)
+            }}>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, color: 'white' }}>Administrative Tasks</Typography>
+              <Grid container spacing={2} sx={{ mt: 1 }}>
                 <Grid item xs={12} md={4}>
-                  <Button fullWidth variant="outlined" sx={{ py: 2, borderRadius: 2 }} onClick={() => runTask('audit')}>Audit System Logs</Button>
+                  <Button fullWidth variant="outlined" sx={{ py: 2, borderRadius: 2, borderColor: alpha('#fff', 0.1), color: '#94a3b8' }} onClick={() => runTask('audit')}>Audit System Logs</Button>
                 </Grid>
                 <Grid item xs={12} md={4}>
-                  <Button fullWidth variant="outlined" sx={{ py: 2, borderRadius: 2 }} onClick={() => runTask('backup')}>Backup Database</Button>
+                  <Button fullWidth variant="outlined" sx={{ py: 2, borderRadius: 2, borderColor: alpha('#fff', 0.1), color: '#94a3b8' }} onClick={() => runTask('backup')}>Backup Database</Button>
                 </Grid>
                 <Grid item xs={12} md={4}>
-                  <Button fullWidth variant="outlined" sx={{ py: 2, borderRadius: 2 }} onClick={() => runTask('broadcast')}>Email Broadcast</Button>
+                  <Button fullWidth variant="outlined" sx={{ py: 2, borderRadius: 2, borderColor: alpha('#fff', 0.1), color: '#94a3b8' }} onClick={() => runTask('broadcast')}>Email Broadcast</Button>
                 </Grid>
               </Grid>
             </Paper>
@@ -338,10 +348,17 @@ function AdminDashboard() {
         )}
 
         {activeTab === 1 && (
-          <Paper sx={{ borderRadius: 3, overflow: 'hidden' }}>
-            <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', gap: 2, alignItems: 'center' }}>
+          <Paper sx={{
+            borderRadius: 4,
+            bgcolor: alpha('#1e293b', 0.4),
+            backdropFilter: 'blur(20px)',
+            border: '1px solid',
+            borderColor: alpha('#fff', 0.05),
+            overflow: 'hidden'
+          }}>
+            <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: alpha('#fff', 0.05), display: 'flex', gap: 2, alignItems: 'center' }}>
               <TextField
-                placeholder="Search users by name, email or role..."
+                placeholder="Search users..."
                 size="small"
                 fullWidth
                 value={searchTerm}
@@ -349,32 +366,39 @@ function AdminDashboard() {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <Search />
+                      <Search sx={{ color: '#94a3b8' }} />
                     </InputAdornment>
                   ),
                 }}
-                sx={{ maxWidth: 400 }}
+                sx={{
+                  maxWidth: 400,
+                  '& .MuiOutlinedInput-root': {
+                    color: 'white',
+                    '& fieldset': { borderColor: alpha('#fff', 0.1) },
+                    '&:hover fieldset': { borderColor: alpha('#fff', 0.2) },
+                  }
+                }}
               />
             </Box>
             <TableContainer>
               <Table>
-                <TableHead sx={{ bgcolor: 'action.hover' }}>
+                <TableHead sx={{ bgcolor: alpha('#fff', 0.02) }}>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>User</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Email</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Role</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 600 }}>Actions</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'white' }}>User</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'white' }}>Email</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'white' }}>Role</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'white' }}>Status</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, color: 'white' }}>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {filteredUsers.map((user) => (
-                    <TableRow key={user.id} hover>
+                    <TableRow key={user.id} hover sx={{ '&:hover': { bgcolor: alpha('#fff', 0.02) } }}>
                       <TableCell>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>{user.username}</Typography>
-                        <Typography variant="caption" color="textSecondary">ID: {user.id}</Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: 'white' }}>{user.username}</Typography>
+                        <Typography variant="caption" sx={{ color: '#64748b' }}>ID: {user.id}</Typography>
                       </TableCell>
-                      <TableCell>{user.email}</TableCell>
+                      <TableCell sx={{ color: '#94a3b8' }}>{user.email}</TableCell>
                       <TableCell>
                         <Chip
                           label={user.role}
@@ -392,7 +416,7 @@ function AdminDashboard() {
                         />
                       </TableCell>
                       <TableCell align="right">
-                        <IconButton size="small" onClick={() => handleOpenDialog(user)}>
+                        <IconButton size="small" onClick={() => handleOpenDialog(user)} sx={{ color: '#94a3b8' }}>
                           <Edit fontSize="small" />
                         </IconButton>
                         <IconButton size="small" color="error" onClick={() => handleDelete(user.id)}>
@@ -417,44 +441,63 @@ function AdminDashboard() {
         {activeTab === 2 && (
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
-              <Paper sx={{ p: 4, borderRadius: 3 }}>
-                <Typography variant="h6" gutterBottom sx={{ fontWeight: 700 }}>General Settings</Typography>
+              <Paper sx={{
+                p: 4,
+                borderRadius: 4,
+                bgcolor: alpha('#1e293b', 0.4),
+                backdropFilter: 'blur(20px)',
+                border: '1px solid',
+                borderColor: alpha('#fff', 0.05)
+              }}>
+                <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, color: 'white' }}>General Settings</Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 2 }}>
                   <TextField
                     label="Platform Name"
                     fullWidth
                     value={systemSettings.platformName}
                     onChange={(e) => handleUpdateSettings('platformName', e.target.value)}
+                    sx={{ '& .MuiOutlinedInput-root': { color: 'white' }, '& .MuiInputLabel-root': { color: '#94a3b8' } }}
                   />
                   <TextField
                     label="Admin Contact Email"
                     fullWidth
                     value={systemSettings.contactEmail}
                     onChange={(e) => handleUpdateSettings('contactEmail', e.target.value)}
+                    sx={{ '& .MuiOutlinedInput-root': { color: 'white' }, '& .MuiInputLabel-root': { color: '#94a3b8' } }}
                   />
                   <FormControlLabel
                     control={<Switch checked={systemSettings.allowNewRegistrations} onChange={(e) => handleUpdateSettings('allowNewRegistrations', e.target.checked)} />}
                     label="Allow Public Registrations"
+                    sx={{ color: '#94a3b8' }}
                   />
                   <FormControlLabel
                     control={<Switch checked={systemSettings.maintenanceMode} onChange={(e) => handleUpdateSettings('maintenanceMode', e.target.checked)} color="error" />}
                     label="Enable Maintenance Mode"
+                    sx={{ color: '#94a3b8' }}
                   />
                 </Box>
               </Paper>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Paper sx={{ p: 4, borderRadius: 3, bgcolor: 'primary.main', color: 'white' }}>
+              <Paper sx={{
+                p: 4,
+                borderRadius: 4,
+                bgcolor: alpha('#3b82f6', 0.1),
+                backdropFilter: 'blur(20px)',
+                border: '1px solid',
+                borderColor: alpha('#3b82f6', 0.2),
+                color: 'white'
+              }}>
                 <Typography variant="h6" gutterBottom sx={{ fontWeight: 700 }}>System Health</Typography>
                 <Box sx={{ mt: 2 }}>
-                  <Typography variant="body2" sx={{ opacity: 0.8, mb: 1 }}>Database Status: {diagnostics.dbConnection}</Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.8, mb: 1 }}>API Version: {diagnostics.apiVersion}</Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.8, mb: 1 }}>Last Backup: {diagnostics.lastBackup}</Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.8, mb: 3 }}>Storage Usage: {diagnostics.storageUsage}</Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.8, mb: 1, color: '#94a3b8' }}>Database Status: <span style={{ color: '#10b981' }}>{diagnostics.dbConnection}</span></Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.8, mb: 1, color: '#94a3b8' }}>API Version: {diagnostics.apiVersion}</Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.8, mb: 1, color: '#94a3b8' }}>Last Backup: {diagnostics.lastBackup}</Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.8, mb: 3, color: '#94a3b8' }}>Storage Usage: {diagnostics.storageUsage}</Typography>
                   <Button
                     variant="contained"
                     onClick={fetchDiagnostics}
-                    sx={{ bgcolor: 'rgba(255,255,255,0.2)', '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' } }}
+                    sx={{ borderRadius: 2, fontWeight: 600 }}
                   >
                     Run Diagnostics
                   </Button>
@@ -465,7 +508,7 @@ function AdminDashboard() {
         )}
 
         <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-          <DialogTitle>
+          <DialogTitle sx={{ fontWeight: 700 }}>
             {editingUser ? 'Edit User' : 'Create New User'}
           </DialogTitle>
           <DialogContent>
@@ -474,9 +517,7 @@ function AdminDashboard() {
                 label="Username"
                 fullWidth
                 value={formData.username}
-                onChange={(e) =>
-                  setFormData({ ...formData, username: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                 disabled={!!editingUser}
                 required
               />
@@ -485,19 +526,15 @@ function AdminDashboard() {
                 fullWidth
                 type="email"
                 value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
               />
               <TextField
-                label={editingUser ? 'New Password (leave empty to keep current)' : 'Password'}
+                label={editingUser ? 'New Password (optional)' : 'Password'}
                 fullWidth
                 type="password"
                 value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required={!editingUser}
                 helperText="Minimum 6 characters"
               />
@@ -506,30 +543,19 @@ function AdminDashboard() {
                 <Select
                   value={formData.role}
                   label="Role"
-                  onChange={(e) =>
-                    setFormData({ ...formData, role: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                 >
                   <MenuItem value="ADMIN">Admin</MenuItem>
                   <MenuItem value="RECRUITER">Recruiter</MenuItem>
                 </Select>
               </FormControl>
-              {error && (
-                <Alert severity="error" sx={{ mt: 2 }}>
-                  {error}
-                </Alert>
-              )}
-              {success && (
-                <Alert severity="success" sx={{ mt: 2 }}>
-                  {success}
-                </Alert>
-              )}
+              {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
             </Box>
           </DialogContent>
-          <DialogActions>
+          <DialogActions sx={{ p: 3 }}>
             <Button onClick={handleCloseDialog} disabled={submitting}>Cancel</Button>
             <Button onClick={handleSubmit} variant="contained" disabled={submitting}>
-              {submitting ? (editingUser ? 'Updating...' : 'Creating...') : (editingUser ? 'Update' : 'Create')}
+              {submitting ? 'Processing...' : (editingUser ? 'Update' : 'Create')}
             </Button>
           </DialogActions>
         </Dialog>
@@ -539,4 +565,3 @@ function AdminDashboard() {
 }
 
 export default AdminDashboard
-

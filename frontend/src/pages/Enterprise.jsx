@@ -1,7 +1,7 @@
 import { Box, Container, Typography, Grid, Paper, Button, Stack, useTheme, alpha, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
 import { ExpandMore, Security, Speed, Settings, SupportAgent, Hub, Storage } from '@mui/icons-material';
 import TopNav from './MainLanding/components/TopNav';
-import FooterLanding from './MainLanding/components/FooterLanding';
+import Footer from '../components/Footer';
 import ParticlesBackground from './MainLanding/components/ParticlesBackground';
 
 export default function Enterprise() {
@@ -20,7 +20,7 @@ export default function Enterprise() {
                     textAlign: 'center',
                     background: 'radial-gradient(circle at 50% 30%, rgba(236, 72, 153, 0.1) 0%, rgba(15, 23, 42, 0) 60%)'
                 }}>
-                    <Container maxWidth="md">
+                    <Container maxWidth="xl">
                         <Typography variant="overline" sx={{ color: 'secondary.main', fontWeight: 800, letterSpacing: 3 }}>
                             ENTERPRISE SOLUTIONS
                         </Typography>
@@ -50,7 +50,7 @@ export default function Enterprise() {
                 </Box>
 
                 {/* Features Grid */}
-                <Container maxWidth="lg" sx={{ pb: 15 }}>
+                <Container maxWidth="xl" sx={{ pb: 15 }}>
                     <Grid container spacing={4}>
                         {[
                             { icon: <Security sx={{ fontSize: 40 }} />, title: "SSO & Security", desc: "Enterprise-grade SAML SSO, advanced proctoring, and SOC2 compliant data handling." },
@@ -85,7 +85,7 @@ export default function Enterprise() {
 
                 {/* FAQ Style Accordion for Enterprise */}
                 <Box sx={{ bgcolor: alpha('#1e293b', 0.3), py: 15 }}>
-                    <Container maxWidth="md">
+                    <Container maxWidth="xl">
                         <Typography variant="h3" fontWeight={800} sx={{ mb: 8, textAlign: 'center' }}>Enterprise FAQ</Typography>
                         {[
                             { q: "How does the ATS integration work?", a: "Our platform provides comprehensive REST APIs and pre-built connectors for major ATS platforms. Once integrated, you can trigger assessments directly from your ATS candidate pipeline and receive scores automatically." },
@@ -105,7 +105,7 @@ export default function Enterprise() {
                 </Box>
 
                 {/* Contact CTA */}
-                <Container maxWidth="lg" sx={{ py: 20 }}>
+                <Container maxWidth="xl" sx={{ py: 20 }}>
                     <Paper
                         sx={{
                             p: { xs: 4, md: 8 },
@@ -127,7 +127,7 @@ export default function Enterprise() {
                     </Paper>
                 </Container>
 
-                <FooterLanding />
+                <Footer />
             </Box>
         </Box>
     );

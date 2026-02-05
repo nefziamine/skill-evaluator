@@ -1,7 +1,7 @@
 import { Box, Container, Typography, Grid, Paper, Avatar, Chip, Button, InputBase, alpha, useTheme, Stack } from '@mui/material';
 import { Search, FilterList, Verified, AutoAwesome, LocationOn, Code } from '@mui/icons-material';
 import TopNav from './MainLanding/components/TopNav';
-import FooterLanding from './MainLanding/components/FooterLanding';
+import Footer from '../components/Footer';
 import ParticlesBackground from './MainLanding/components/ParticlesBackground';
 
 const candidates = [
@@ -70,7 +70,7 @@ export default function BrowseTalent() {
             <Box sx={{ position: 'relative', zIndex: 2 }}>
                 <TopNav />
 
-                <Container maxWidth="lg" sx={{ pt: 15, pb: 10 }}>
+                <Container maxWidth="xl" sx={{ pt: 15, pb: 10 }}>
                     <Box textAlign="center" mb={8}>
                         <Typography variant="h2" fontWeight={900} gutterBottom sx={{
                             background: 'linear-gradient(to right, #fff, #94a3b8)',
@@ -236,7 +236,7 @@ export default function BrowseTalent() {
                     </Box>
                 </Container>
 
-                <FooterLanding />
+                <Footer />
             </Box>
         </Box>
     );

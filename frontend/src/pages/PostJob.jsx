@@ -1,7 +1,7 @@
 import { Box, Container, Typography, Grid, Paper, Button, Stack, useTheme, alpha, TextField, MenuItem } from '@mui/material';
 import { Create, Assignment, Share, Analytics, AutoAwesome, CheckCircleOutline } from '@mui/icons-material';
 import TopNav from './MainLanding/components/TopNav';
-import FooterLanding from './MainLanding/components/FooterLanding';
+import Footer from '../components/Footer';
 import ParticlesBackground from './MainLanding/components/ParticlesBackground';
 
 export default function PostJob() {
@@ -13,7 +13,7 @@ export default function PostJob() {
             <Box sx={{ position: 'relative', zIndex: 2 }}>
                 <TopNav />
 
-                <Container maxWidth="lg" sx={{ pt: 15, pb: 15 }}>
+                <Container maxWidth="xl" sx={{ pt: 15, pb: 15 }}>
                     <Grid container spacing={8} alignItems="center">
                         <Grid item xs={12} md={6}>
                             <Typography variant="h1" sx={{
@@ -155,7 +155,7 @@ export default function PostJob() {
                     </Box>
                 </Container>
 
-                <FooterLanding />
+                <Footer />
             </Box>
         </Box>
     );

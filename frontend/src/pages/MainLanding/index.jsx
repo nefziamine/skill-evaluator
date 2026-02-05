@@ -8,7 +8,7 @@ import SkillsGrid from './components/SkillsGrid';
 import RecruiterFeatures from './components/RecruiterFeatures';
 import Testimonials from './components/Testimonials';
 import FAQ from './components/FAQ';
-import FooterLanding from './components/FooterLanding';
+import Footer from '../../components/Footer';
 import ParticlesBackground from './components/ParticlesBackground';
 
 export default function HomePage() {
@@ -25,7 +25,7 @@ export default function HomePage() {
                 <RecruiterFeatures />
                 <Testimonials />
                 <FAQ />
-                <FooterLanding />
+                <Footer />
             </Box>
         </Box>
     );

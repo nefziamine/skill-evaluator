@@ -16,7 +16,11 @@ export default function FooterLanding() {
                         </Typography>
                         <Stack direction="row" spacing={2}>
                             <Link href="#" color="text.secondary"><GitHub /></Link>
-                            <Link href="#" color="text.secondary"><Twitter /></Link>
+                            <Link href="#" color="text.secondary">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" style={{ width: 24, height: 24, fill: 'currentColor' }}>
+                                    <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932L18.901 1.153zM17.61 20.644h2.039L6.486 3.24H4.298l13.312 17.404z" />
+                                </svg>
+                            </Link>
                             <Link href="#" color="text.secondary"><LinkedIn /></Link>
                         </Stack>
                     </Grid>
@@ -60,12 +64,9 @@ export default function FooterLanding() {
 
                 <Divider sx={{ my: 6 }} />
 
-                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <Typography variant="body2" color="text.secondary">
                         © {new Date().getFullYear()} Skill Evaluator. All rights reserved.
-                    </Typography>
-                    <Typography variant="caption" color="text.disabled" sx={{ mt: { xs: 2, sm: 0 } }}>
-                        Verification supports recruitment decisions; final hiring decisions remain the responsibility of employers.
                     </Typography>
                 </Box>
             </Container>

@@ -7,7 +7,7 @@ import {
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import TopNav from './MainLanding/components/TopNav';
-import FooterLanding from './MainLanding/components/FooterLanding';
+import Footer from '../components/Footer';
 import ParticlesBackground from './MainLanding/components/ParticlesBackground';
 
 const developerSteps = [
@@ -93,7 +93,7 @@ export default function HowItWorksPage() {
                     background: 'radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15) 0%, rgba(15, 23, 42, 0) 70%)',
                     textAlign: 'center'
                 }}>
-                    <Container maxWidth="md">
+                    <Container maxWidth="xl">
                         <Typography
                             variant="h1"
                             sx={{
@@ -136,7 +136,7 @@ export default function HowItWorksPage() {
                 </Box>
 
                 {/* Steps Section */}
-                <Container maxWidth="lg" sx={{ pb: 15 }}>
+                <Container maxWidth="xl" sx={{ pb: 15 }}>
                     <Grid container spacing={4}>
                         {steps.map((step, index) => (
                             <Grid item xs={12} md={6} lg={3} key={index}>
@@ -205,7 +205,7 @@ export default function HowItWorksPage() {
 
                 {/* Core Features Section */}
                 <Box sx={{ bgcolor: alpha('#1e293b', 0.3), py: 15 }}>
-                    <Container maxWidth="lg">
+                    <Container maxWidth="xl">
                         <Grid container spacing={8} alignItems="center">
                             <Grid item xs={12} md={6}>
                                 <Typography variant="h3" fontWeight={800} sx={{ mb: 4, letterSpacing: '-0.02em' }}>
@@ -287,7 +287,7 @@ export default function HowItWorksPage() {
                 </Box>
 
                 {/* CTA Section */}
-                <Container maxWidth="md" sx={{ py: 15, textAlign: 'center' }}>
+                <Container maxWidth="xl" sx={{ py: 15, textAlign: 'center' }}>
                     <Typography variant="h3" fontWeight={800} sx={{ mb: 3 }}>
                         Ready to get started?
                     </Typography>
@@ -334,7 +334,7 @@ export default function HowItWorksPage() {
                     </Stack>
                 </Container>
 
-                <FooterLanding />
+                <Footer />
             </Box>
         </Box>
     );

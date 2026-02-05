@@ -353,9 +353,14 @@ function RecruiterDashboard() {
 
   return (
     <Layout>
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 4, alignItems: 'center' }}>
-          <Typography variant="h4" component="h1" sx={{ fontWeight: 800, color: 'primary.main' }}>
+          <Typography variant="h4" component="h1" sx={{
+            fontWeight: 800,
+            background: 'linear-gradient(to right, #60a5fa, #3b82f6)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}>
             Recruiter Dashboard
           </Typography>
           <Box sx={{ display: 'flex', gap: 2 }}>
@@ -399,13 +404,26 @@ function RecruiterDashboard() {
           </Alert>
         )}
 
-        <Paper sx={{ mb: 3, borderRadius: 2 }}>
+        <Paper sx={{
+          mb: 3,
+          borderRadius: 4,
+          bgcolor: alpha('#1e293b', 0.4),
+          backdropFilter: 'blur(20px)',
+          border: '1px solid',
+          borderColor: alpha('#fff', 0.05),
+          overflow: 'hidden'
+        }}>
           <Tabs
             value={tabValue}
             onChange={(e, v) => setTabValue(v)}
             variant="scrollable"
             scrollButtons="auto"
-            sx={{ borderBottom: 1, borderColor: 'divider' }}
+            sx={{
+              borderBottom: 1,
+              borderColor: alpha('#fff', 0.05),
+              '& .MuiTab-root': { color: '#94a3b8', fontWeight: 600 },
+              '& .Mui-selected': { color: 'white' }
+            }}
           >
             <Tab icon={<Assessment />} label="Tests" iconPosition="start" />
             <Tab icon={<Quiz />} label="Question Bank" iconPosition="start" />
@@ -426,9 +444,12 @@ function RecruiterDashboard() {
                 <Grid item xs={12} sm={6} md={3} key={index}>
                   <Card sx={{
                     borderRadius: 4,
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+                    bgcolor: alpha('#1e293b', 0.5),
+                    backdropFilter: 'blur(10px)',
                     border: '1px solid',
-                    borderColor: alpha('#E2E8F0', 0.6)
+                    borderColor: alpha('#fff', 0.1),
+                    transition: 'transform 0.2s',
+                    '&:hover': { transform: 'translateY(-5px)' }
                   }}>
                     <CardContent sx={{ p: 3 }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -454,7 +475,13 @@ function RecruiterDashboard() {
               ))}
             </Grid>
 
-            <TableContainer component={Paper}>
+            <TableContainer component={Paper} sx={{
+              bgcolor: alpha('#1e293b', 0.4),
+              backdropFilter: 'blur(10px)',
+              borderRadius: 4,
+              border: '1px solid',
+              borderColor: alpha('#fff', 0.05)
+            }}>
               <Table>
                 <TableHead>
                   <TableRow>
@@ -541,9 +568,15 @@ function RecruiterDashboard() {
               </Button>
             </Box>
 
-            <TableContainer component={Paper}>
+            <TableContainer component={Paper} sx={{
+              bgcolor: alpha('#1e293b', 0.4),
+              backdropFilter: 'blur(10px)',
+              borderRadius: 4,
+              border: '1px solid',
+              borderColor: alpha('#fff', 0.05)
+            }}>
               <Table>
-                <TableHead>
+                <TableHead sx={{ bgcolor: alpha('#fff', 0.02) }}>
                   <TableRow>
                     <TableCell padding="checkbox">
                       <Checkbox
@@ -552,43 +585,56 @@ function RecruiterDashboard() {
                         onChange={handleSelectAllQuestions}
                       />
                     </TableCell>
-                    <TableCell>Text</TableCell>
-                    <TableCell>Type</TableCell>
-                    <TableCell>Skill</TableCell>
-                    <TableCell>Difficulty</TableCell>
-                    <TableCell>Points</TableCell>
-                    <TableCell>Actions</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'white' }}>Text</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'white' }}>Type</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'white' }}>Skill</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'white' }}>Difficulty</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'white' }}>Points</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'white' }}>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {questions.map((question) => (
-                    <TableRow key={question.id} selected={selectedQuestionIds.includes(question.id)}>
+                    <TableRow key={question.id} selected={selectedQuestionIds.includes(question.id)} sx={{ '&:hover': { bgcolor: alpha('#fff', 0.02) } }}>
                       <TableCell padding="checkbox">
                         <Checkbox
                           checked={selectedQuestionIds.includes(question.id)}
                           onChange={() => handleSelectQuestion(question.id)}
                         />
                       </TableCell>
-                      <TableCell>
+                      <TableCell sx={{ color: 'white' }}>
                         {question.text.substring(0, 50)}...
                       </TableCell>
-                      <TableCell>{question.type}</TableCell>
-                      <TableCell>{question.skill}</TableCell>
-                      <TableCell>{question.difficulty}</TableCell>
-                      <TableCell>{question.points}</TableCell>
+                      <TableCell sx={{ color: '#94a3b8' }}>{question.type}</TableCell>
+                      <TableCell>
+                        <Chip label={question.skill} size="small" variant="outlined" sx={{ borderColor: alpha('#fff', 0.1), color: '#94a3b8' }} />
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={question.difficulty}
+                          size="small"
+                          sx={{
+                            bgcolor: alpha(question.difficulty === 'HARD' ? '#ef4444' : question.difficulty === 'MEDIUM' ? '#f59e0b' : '#10b981', 0.1),
+                            color: question.difficulty === 'HARD' ? '#ef4444' : question.difficulty === 'MEDIUM' ? '#f59e0b' : '#10b981',
+                            fontWeight: 600
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell sx={{ color: 'white', fontWeight: 700 }}>{question.points}</TableCell>
                       <TableCell>
                         <IconButton
                           size="small"
                           onClick={() => handleQuestionDialogOpen(question)}
+                          sx={{ color: '#94a3b8' }}
                         >
-                          <Edit />
+                          <Edit fontSize="small" />
                         </IconButton>
                         <IconButton
                           size="small"
                           onClick={() => handleDeleteQuestion(question.id)}
                           color="error"
                         >
-                          <Delete />
+                          <Delete fontSize="small" />
                         </IconButton>
                       </TableCell>
                     </TableRow>
@@ -600,9 +646,16 @@ function RecruiterDashboard() {
         )}
 
         {tabValue === 2 && (
-          <Paper sx={{ p: 3, borderRadius: 3 }}>
+          <Paper sx={{
+            p: 4,
+            borderRadius: 4,
+            bgcolor: alpha('#1e293b', 0.4),
+            backdropFilter: 'blur(20px)',
+            border: '1px solid',
+            borderColor: alpha('#fff', 0.05)
+          }}>
             <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              <Typography variant="h6" sx={{ fontWeight: 800, color: 'white' }}>
                 Candidate Comparison Matrix
               </Typography>
               <Button
@@ -610,61 +663,73 @@ function RecruiterDashboard() {
                 variant="contained"
                 disabled={selectedSessions.length < 2}
                 onClick={() => setSuccess('Generating comparison view...')}
+                sx={{ borderRadius: 2, fontWeight: 700 }}
               >
                 Compare {selectedSessions.length} Candidates
               </Button>
             </Box>
-            <Alert severity="info" sx={{ mb: 3 }}>
+            <Alert
+              severity="info"
+              sx={{
+                mb: 3,
+                bgcolor: alpha('#3b82f6', 0.1),
+                color: '#60a5fa',
+                border: '1px solid',
+                borderColor: alpha('#3b82f6', 0.2),
+                '& .MuiAlert-icon': { color: '#60a5fa' }
+              }}
+            >
               Select at least two candidates to compare their performance across skills and difficulty levels.
             </Alert>
             <TableContainer>
               <Table>
-                <TableHead sx={{ bgcolor: 'action.hover' }}>
+                <TableHead sx={{ bgcolor: alpha('#fff', 0.02) }}>
                   <TableRow>
                     <TableCell padding="checkbox">
-                      Select
+                      <Typography variant="caption" sx={{ color: 'white', fontWeight: 700 }}>SELECT</Typography>
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Candidate</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Test Title</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Score</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Knowledge Base</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Submitted At</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'white' }}>CANDIDATE</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'white' }}>TEST TITLE</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'white' }}>SCORE</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'white' }}>KNOWLEDGE BASE</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: 'white' }}>SUBMITTED AT</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {completedSessions.map((session) => (
-                    <TableRow key={session.id} hover selected={selectedSessions.includes(session.id)}>
+                    <TableRow key={session.id} hover selected={selectedSessions.includes(session.id)} sx={{ '&:hover': { bgcolor: alpha('#fff', 0.02) } }}>
                       <TableCell padding="checkbox">
                         <Checkbox
                           checked={selectedSessions.includes(session.id)}
                           onChange={() => handleSessionSelection(session.id)}
                         />
                       </TableCell>
-                      <TableCell>{session.candidate?.username}</TableCell>
-                      <TableCell>{session.test?.title}</TableCell>
+                      <TableCell sx={{ color: 'white', fontWeight: 600 }}>{session.candidate?.username}</TableCell>
+                      <TableCell sx={{ color: '#94a3b8' }}>{session.test?.title}</TableCell>
                       <TableCell>
-                        <Typography fontWeight={700} color="primary">
+                        <Typography fontWeight={800} sx={{ color: '#3b82f6' }}>
                           {session.score}/{session.totalPoints}
                         </Typography>
-                        <Typography variant="caption" color="textSecondary">
+                        <Typography variant="caption" sx={{ color: '#64748b' }}>
                           ({Math.round(session.score * 100 / session.totalPoints)}%)
                         </Typography>
                       </TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
                           {session.skillBreakdown && Object.entries(JSON.parse(session.skillBreakdown)).map(([skill, score]) => (
-                            <Chip key={skill} label={`${skill}: ${score}`} size="small" variant="outlined" />
+                            <Chip
+                              key={skill}
+                              label={`${skill}: ${score}`}
+                              size="small"
+                              variant="outlined"
+                              sx={{ borderColor: alpha('#fff', 0.1), color: '#94a3b8', fontSize: '0.75rem' }}
+                            />
                           ))}
                         </Box>
                       </TableCell>
-                      <TableCell>{new Date(session.submittedAt).toLocaleDateString()}</TableCell>
+                      <TableCell sx={{ color: '#64748b' }}>{new Date(session.submittedAt).toLocaleDateString()}</TableCell>
                     </TableRow>
                   ))}
-                  {completedSessions.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={6} align="center">No completed sessions found.</TableCell>
-                    </TableRow>
-                  )}
                 </TableBody>
               </Table>
             </TableContainer>
@@ -674,23 +739,45 @@ function RecruiterDashboard() {
         {tabValue === 3 && (
           <Grid container spacing={3}>
             <Grid item xs={12} md={8}>
-              <Paper sx={{ p: 4, borderRadius: 3 }}>
-                <Typography variant="h6" gutterBottom sx={{ fontWeight: 700 }}>
+              <Paper sx={{
+                p: 4,
+                borderRadius: 4,
+                bgcolor: alpha('#1e293b', 0.4),
+                backdropFilter: 'blur(20px)',
+                border: '1px solid',
+                borderColor: alpha('#fff', 0.05)
+              }}>
+                <Typography variant="h6" gutterBottom sx={{ fontWeight: 800, color: 'white' }}>
                   Recent Evaluation Reports
                 </Typography>
                 <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {completedSessions.map((session) => (
-                    <Box key={session.id} sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box key={session.id} sx={{
+                      p: 2.5,
+                      bgcolor: alpha('#fff', 0.02),
+                      border: '1px solid',
+                      borderColor: alpha('#fff', 0.05),
+                      borderRadius: 3,
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      transition: 'all 0.2s',
+                      '&:hover': { bgcolor: alpha('#fff', 0.04), borderColor: alpha('#3b82f6', 0.3) }
+                    }}>
                       <Box>
-                        <Typography sx={{ fontWeight: 600 }}>{session.candidate?.username} - {session.test?.title}</Typography>
-                        <Typography variant="caption" color="textSecondary">Submitted on {new Date(session.submittedAt).toLocaleString()}</Typography>
+                        <Typography sx={{ fontWeight: 700, color: 'white' }}>{session.candidate?.username} - {session.test?.title}</Typography>
+                        <Typography variant="caption" sx={{ color: '#64748b' }}>Submitted on {new Date(session.submittedAt).toLocaleString()}</Typography>
                       </Box>
-                      <Button variant="text" startIcon={<TrendingUp />} onClick={() => handleOpenReport(session.id)}>View Report</Button>
+                      <Button
+                        variant="text"
+                        startIcon={<TrendingUp />}
+                        onClick={() => handleOpenReport(session.id)}
+                        sx={{ fontWeight: 700, color: '#60a5fa' }}
+                      >
+                        View Report
+                      </Button>
                     </Box>
                   ))}
-                  {completedSessions.length === 0 && (
-                    <Typography align="center">No evalution reports available yet.</Typography>
-                  )}
                 </Box>
               </Paper>
             </Grid>
