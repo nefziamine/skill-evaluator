@@ -15,10 +15,13 @@ import com.skillevaluator.model.Test;
 import com.skillevaluator.model.Question;
 import com.skillevaluator.model.TestSession;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.transaction.annotation.Transactional;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 @RestController
 @RequestMapping("/api/recruiter")
@@ -58,11 +61,12 @@ public class RecruiterController {
             String skill = (String) data.getOrDefault("skill", "General");
             String difficulty = (String) data.getOrDefault("difficulty", "MEDIUM");
             Integer questionCount = Integer.parseInt(data.getOrDefault("count", "5").toString());
+            String questionType = (String) data.getOrDefault("questionType", "RANDOM");
 
             User creator = (User) authentication.getPrincipal();
 
             // 1. Generate questions via AI
-            List<Question> generatedQuestions = aiService.generateQuestions(skill, difficulty, questionCount);
+            List<Question> generatedQuestions = aiService.generateQuestions(skill, difficulty, questionCount, questionType);
 
             // 2. Wrap into a Test
             Test test = new Test();
@@ -426,6 +430,96 @@ public class RecruiterController {
         }
 
         return ResponseEntity.ok(session);
+    }
+
+    @PostMapping("/compare-candidates/ai-advice")
+    public ResponseEntity<?> getHiringAdvice(@RequestBody Map<String, Object> request, Authentication authentication) {
+        try {
+            @SuppressWarnings("unchecked")
+            List<Object> sessionIdsRaw = (List<Object>) request.get("sessionIds");
+            
+            if (sessionIdsRaw == null || sessionIdsRaw.size() < 2) {
+                return ResponseEntity.badRequest().body(Map.of("error", "At least 2 session IDs are required"));
+            }
+
+            // Convert session IDs to Long (handle both Integer and Long from JSON)
+            List<Long> sessionIds = new ArrayList<>();
+            for (Object id : sessionIdsRaw) {
+                if (id instanceof Integer) {
+                    sessionIds.add(((Integer) id).longValue());
+                } else if (id instanceof Long) {
+                    sessionIds.add((Long) id);
+                } else if (id instanceof Number) {
+                    sessionIds.add(((Number) id).longValue());
+                } else {
+                    System.err.println("Invalid session ID type: " + id.getClass().getName());
+                }
+            }
+
+            if (sessionIds.size() < 2) {
+                return ResponseEntity.badRequest().body(Map.of("error", "At least 2 valid session IDs are required"));
+            }
+
+            User currentUser = (User) authentication.getPrincipal();
+            List<Map<String, Object>> candidateData = new ArrayList<>();
+
+            for (Long sessionId : sessionIds) {
+                Optional<TestSession> sessionOpt = testSessionRepository.findById(sessionId);
+                if (sessionOpt.isEmpty()) {
+                    continue;
+                }
+
+                TestSession session = sessionOpt.get();
+                
+                // Check access
+                if (currentUser.getRole() != Role.ADMIN &&
+                        !session.getTest().getCreatedBy().getId().equals(currentUser.getId())) {
+                    continue;
+                }
+
+                if (!session.getIsCompleted() || session.getScore() == null) {
+                    continue;
+                }
+
+                Map<String, Object> candidate = new HashMap<>();
+                candidate.put("name", session.getCandidate().getUsername());
+                candidate.put("testTitle", session.getTest().getTitle());
+                candidate.put("score", session.getScore());
+                candidate.put("totalPoints", session.getTotalPoints());
+                candidate.put("submittedAt", session.getSubmittedAt() != null ? session.getSubmittedAt().toString() : "N/A");
+                
+                if (session.getSkillBreakdown() != null && !session.getSkillBreakdown().isEmpty()) {
+                    try {
+                        ObjectMapper mapper = new ObjectMapper();
+                        Map<String, Integer> skillMap = mapper.readValue(session.getSkillBreakdown(), 
+                            new TypeReference<Map<String, Integer>>() {});
+                        candidate.put("skillBreakdown", skillMap);
+                    } catch (Exception e) {
+                        // Skip skill breakdown if parsing fails
+                    }
+                }
+
+                candidateData.add(candidate);
+            }
+
+            if (candidateData.size() < 2) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Insufficient valid candidate data for comparison"));
+            }
+
+            System.out.println("Generating hiring advice for " + candidateData.size() + " candidates");
+            String advice = aiService.generateHiringAdvice(candidateData);
+            
+            if (advice == null || advice.isEmpty()) {
+                return ResponseEntity.status(500).body(Map.of("error", "AI service returned empty advice"));
+            }
+            
+            return ResponseEntity.ok(Map.of("advice", advice));
+
+        } catch (Exception e) {
+            System.err.println("Error in hiring advice endpoint: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to generate hiring advice: " + e.getMessage()));
+        }
     }
 
     @GetMapping("/analytics")

@@ -77,8 +77,14 @@ function RecruiterDashboard() {
   const [selectedTestToInvite, setSelectedTestToInvite] = useState(null)
   const [inviteFormData, setInviteFormData] = useState({ testId: '' })
   const [aiDialogOpen, setAiDialogOpen] = useState(false)
-  const [aiFormData, setAiFormData] = useState({ skill: 'Java', difficulty: 'MEDIUM', count: 5 })
+  const [aiFormData, setAiFormData] = useState({ skill: 'Java', difficulty: 'MEDIUM', count: 5, questionType: 'RANDOM' })
   const [generatingAi, setGeneratingAi] = useState(false)
+  const [compareDialogOpen, setCompareDialogOpen] = useState(false)
+  const [customReportDialogOpen, setCustomReportDialogOpen] = useState(false)
+  const [customReportForm, setCustomReportForm] = useState({ testId: '', dateRange: '', skills: '', format: 'PDF' })
+  const [questionFilters, setQuestionFilters] = useState({ type: 'ALL', difficulty: 'ALL', skill: '' })
+  const [aiAdvice, setAiAdvice] = useState('')
+  const [loadingAdvice, setLoadingAdvice] = useState(false)
   const [testFormData, setTestFormData] = useState({
     title: '',
     description: '',
@@ -111,10 +117,10 @@ function RecruiterDashboard() {
   }, [tabValue])
 
   useEffect(() => {
-    if (tabValue === 1 && questions.length === 0) {
+    if (tabValue === 1) {
       fetchQuestions()
     }
-  }, [tabValue])
+  }, [tabValue, questionFilters])
 
   const fetchData = async () => {
     setLoading(true)
@@ -141,7 +147,12 @@ function RecruiterDashboard() {
   }
 
   const fetchQuestions = async () => {
-    const response = await api.get('/recruiter/questions')
+    const params = new URLSearchParams()
+    if (questionFilters.type !== 'ALL') params.append('type', questionFilters.type)
+    if (questionFilters.difficulty !== 'ALL') params.append('difficulty', questionFilters.difficulty)
+    if (questionFilters.skill) params.append('skill', questionFilters.skill)
+    
+    const response = await api.get(`/recruiter/questions?${params.toString()}`)
     setQuestions(response.data)
   }
 
@@ -335,6 +346,101 @@ function RecruiterDashboard() {
       } else {
         setError(err.response?.data?.error || 'Failed to generate invitation link')
       }
+    }
+  }
+
+  const handleCompareCandidates = () => {
+    setCompareDialogOpen(true)
+    fetchAiAdvice()
+  }
+
+  const fetchAiAdvice = async () => {
+    if (selectedSessions.length < 2) {
+      setAiAdvice('')
+      return
+    }
+
+    setLoadingAdvice(true)
+    setAiAdvice('')
+    try {
+      console.log('Fetching AI advice for sessions:', selectedSessions)
+      const response = await api.post('/recruiter/compare-candidates/ai-advice', {
+        sessionIds: selectedSessions
+      })
+      console.log('AI advice response:', response.data)
+      if (response.data.advice) {
+        setAiAdvice(response.data.advice)
+      } else if (response.data.error) {
+        setAiAdvice('Error: ' + response.data.error)
+      } else {
+        setAiAdvice('No advice received from the server.')
+      }
+    } catch (err) {
+      console.error('Failed to fetch AI advice:', err)
+      const errorMessage = err.response?.data?.error || err.message || 'Unknown error'
+      setAiAdvice(`Unable to generate AI hiring advice: ${errorMessage}. Please check the backend logs for more details.`)
+    } finally {
+      setLoadingAdvice(false)
+    }
+  }
+
+  const handleExportPDF = () => {
+    if (!reportDetails) return
+    
+    // Simple PDF export using browser print functionality
+    const printWindow = window.open('', '_blank')
+    const content = `
+      <html>
+        <head>
+          <title>Candidate Performance Report</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            h1 { color: #3b82f6; }
+            .section { margin: 20px 0; }
+            .score { font-size: 24px; font-weight: bold; color: #3b82f6; }
+            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #3b82f6; color: white; }
+          </style>
+        </head>
+        <body>
+          <h1>Candidate Performance Report</h1>
+          <div class="section">
+            <h2>Candidate Information</h2>
+            <p><strong>Name:</strong> ${reportDetails.candidate?.username || 'N/A'}</p>
+            <p><strong>Email:</strong> ${reportDetails.candidate?.email || 'N/A'}</p>
+          </div>
+          <div class="section">
+            <h2>Test Information</h2>
+            <p><strong>Test:</strong> ${reportDetails.test?.title || 'N/A'}</p>
+            <p><strong>Submitted:</strong> ${new Date(reportDetails.submittedAt).toLocaleString()}</p>
+            <p class="score">Score: ${reportDetails.score}/${reportDetails.totalPoints} (${Math.round(reportDetails.score * 100 / reportDetails.totalPoints)}%)</p>
+          </div>
+          <div class="section">
+            <h2>Skill Breakdown</h2>
+            <table>
+              <tr><th>Skill</th><th>Score</th></tr>
+              ${reportDetails.skillBreakdown ? Object.entries(JSON.parse(reportDetails.skillBreakdown)).map(([skill, score]) => 
+                `<tr><td>${skill}</td><td>${score}</td></tr>`
+              ).join('') : '<tr><td colspan="2">No skill breakdown available</td></tr>'}
+            </table>
+          </div>
+        </body>
+      </html>
+    `
+    printWindow.document.write(content)
+    printWindow.document.close()
+    printWindow.print()
+  }
+
+  const handleCustomReportSubmit = async () => {
+    try {
+      // In a real implementation, this would send a request to the backend
+      setSuccess('Custom report request submitted! You will receive it via email.')
+      setCustomReportDialogOpen(false)
+      setCustomReportForm({ testId: '', dateRange: '', skills: '', format: 'PDF' })
+    } catch (err) {
+      setError('Failed to submit custom report request')
     }
   }
 
@@ -674,7 +780,7 @@ function RecruiterDashboard() {
                 startIcon={<BarChart />}
                 variant="contained"
                 disabled={selectedSessions.length < 2}
-                onClick={() => setSuccess('Generating comparison view...')}
+                onClick={() => setCompareDialogOpen(true)}
                 sx={{ borderRadius: 2, fontWeight: 700 }}
               >
                 Compare {selectedSessions.length} Candidates
@@ -801,7 +907,12 @@ function RecruiterDashboard() {
                     <Typography variant="body2" sx={{ opacity: 0.9, mb: 1 }}>Avg. Hiring Time: 12 days</Typography>
                     <Typography variant="body2" sx={{ opacity: 0.9, mb: 1 }}>Candidate ROI: +24%</Typography>
                     <Typography variant="body2" sx={{ opacity: 0.9, mb: 3 }}>Top Performer Accuracy: 88%</Typography>
-                    <Button fullWidth variant="contained" sx={{ bgcolor: 'white', color: 'primary.main', '&:hover': { bgcolor: '#f5f5f5' } }}>
+                    <Button 
+                      fullWidth 
+                      variant="contained" 
+                      onClick={() => setCustomReportDialogOpen(true)}
+                      sx={{ bgcolor: 'white', color: 'primary.main', '&:hover': { bgcolor: '#f5f5f5' } }}
+                    >
                       Request Custom Report
                     </Button>
                   </Box>
@@ -978,7 +1089,14 @@ function RecruiterDashboard() {
           </DialogContent>
           <DialogActions sx={{ p: 3, bgcolor: 'background.default' }}>
             <Button onClick={() => setReportDetails(null)} sx={{ fontWeight: 600 }}>Close Report</Button>
-            <Button variant="contained" startIcon={<Description />} sx={{ fontWeight: 600, borderRadius: 2 }}>Export to PDF</Button>
+            <Button 
+              variant="contained" 
+              startIcon={<Description />} 
+              onClick={handleExportPDF}
+              sx={{ fontWeight: 600, borderRadius: 2 }}
+            >
+              Export to PDF
+            </Button>
           </DialogActions>
         </Dialog>
 
@@ -1122,6 +1240,47 @@ function RecruiterDashboard() {
                 }
                 label="Active"
               />
+              <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                <FormControl sx={{ minWidth: 150 }}>
+                  <InputLabel>Filter by Type</InputLabel>
+                  <Select
+                    value={questionFilters.type}
+                    label="Filter by Type"
+                    onChange={(e) => {
+                      setQuestionFilters({ ...questionFilters, type: e.target.value })
+                    }}
+                  >
+                    <MenuItem value="ALL">All Types</MenuItem>
+                    <MenuItem value="MCQ">MCQ</MenuItem>
+                    <MenuItem value="TRUE_FALSE">True/False</MenuItem>
+                    <MenuItem value="SHORT_ANSWER">Short Answer</MenuItem>
+                  </Select>
+                </FormControl>
+                <FormControl sx={{ minWidth: 150 }}>
+                  <InputLabel>Filter by Difficulty</InputLabel>
+                  <Select
+                    value={questionFilters.difficulty}
+                    label="Filter by Difficulty"
+                    onChange={(e) => {
+                      setQuestionFilters({ ...questionFilters, difficulty: e.target.value })
+                    }}
+                  >
+                    <MenuItem value="ALL">All Difficulties</MenuItem>
+                    <MenuItem value="EASY">Easy</MenuItem>
+                    <MenuItem value="MEDIUM">Medium</MenuItem>
+                    <MenuItem value="HARD">Hard</MenuItem>
+                  </Select>
+                </FormControl>
+                <TextField
+                  label="Filter by Skill"
+                  size="small"
+                  value={questionFilters.skill}
+                  onChange={(e) => {
+                    setQuestionFilters({ ...questionFilters, skill: e.target.value })
+                  }}
+                  sx={{ flexGrow: 1 }}
+                />
+              </Box>
               <FormControl fullWidth>
                 <InputLabel>Select Questions</InputLabel>
                 <Select
@@ -1139,7 +1298,7 @@ function RecruiterDashboard() {
                 >
                   {questions.map((q) => (
                     <MenuItem key={q.id} value={q.id}>
-                      {q.text.substring(0, 60)}... ({q.skill} - {q.difficulty})
+                      {q.text.substring(0, 60)}... ({q.skill} - {q.difficulty} - {q.type})
                     </MenuItem>
                   ))}
                 </Select>
@@ -1332,6 +1491,19 @@ function RecruiterDashboard() {
                 value={aiFormData.count}
                 onChange={(e) => setAiFormData({ ...aiFormData, count: parseInt(e.target.value) })}
               />
+              <FormControl fullWidth>
+                <InputLabel>Question Type</InputLabel>
+                <Select
+                  value={aiFormData.questionType}
+                  label="Question Type"
+                  onChange={(e) => setAiFormData({ ...aiFormData, questionType: e.target.value })}
+                >
+                  <MenuItem value="RANDOM">Random (Mixed Types)</MenuItem>
+                  <MenuItem value="MCQ">Multiple Choice (MCQ)</MenuItem>
+                  <MenuItem value="TRUE_FALSE">True/False</MenuItem>
+                  <MenuItem value="SHORT_ANSWER">Short Answer</MenuItem>
+                </Select>
+              </FormControl>
             </Box>
           </DialogContent>
           <DialogActions sx={{ px: 3, pb: 2 }}>
@@ -1344,6 +1516,184 @@ function RecruiterDashboard() {
               startIcon={generatingAi ? <CircularProgress size={20} color="inherit" /> : <AutoFixHigh />}
             >
               {generatingAi ? 'Generating...' : 'Generate Test'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Compare Candidates Dialog */}
+        <Dialog open={compareDialogOpen} onClose={() => setCompareDialogOpen(false)} maxWidth="lg" fullWidth>
+          <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <BarChart color="primary" />
+            Candidate Comparison
+          </DialogTitle>
+          <DialogContent>
+            {selectedSessions.length >= 2 ? (
+              <Box sx={{ mt: 2 }}>
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 700 }}>Metric</TableCell>
+                        {selectedSessions.map(sessionId => {
+                          const session = completedSessions.find(s => s.id === sessionId)
+                          return session ? (
+                            <TableCell key={sessionId} sx={{ fontWeight: 700 }}>
+                              {session.candidate?.username || 'Unknown'}
+                            </TableCell>
+                          ) : null
+                        })}
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell>Test</TableCell>
+                        {selectedSessions.map(sessionId => {
+                          const session = completedSessions.find(s => s.id === sessionId)
+                          return <TableCell key={sessionId}>{session?.test?.title || 'N/A'}</TableCell>
+                        })}
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>Score</TableCell>
+                        {selectedSessions.map(sessionId => {
+                          const session = completedSessions.find(s => s.id === sessionId)
+                          return session ? (
+                            <TableCell key={sessionId}>
+                              {session.score}/{session.totalPoints} ({Math.round(session.score * 100 / session.totalPoints)}%)
+                            </TableCell>
+                          ) : <TableCell key={sessionId}>N/A</TableCell>
+                        })}
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>Submitted At</TableCell>
+                        {selectedSessions.map(sessionId => {
+                          const session = completedSessions.find(s => s.id === sessionId)
+                          return <TableCell key={sessionId}>{session?.submittedAt ? new Date(session.submittedAt).toLocaleString() : 'N/A'}</TableCell>
+                        })}
+                      </TableRow>
+                      {selectedSessions.length > 0 && completedSessions.find(s => selectedSessions.includes(s.id))?.skillBreakdown && (
+                        <>
+                          {Object.keys(JSON.parse(completedSessions.find(s => selectedSessions.includes(s.id))?.skillBreakdown || '{}')).map(skill => (
+                            <TableRow key={skill}>
+                              <TableCell>{skill}</TableCell>
+                              {selectedSessions.map(sessionId => {
+                                const session = completedSessions.find(s => s.id === sessionId)
+                                const breakdown = session?.skillBreakdown ? JSON.parse(session.skillBreakdown) : {}
+                                return <TableCell key={sessionId}>{breakdown[skill] || 'N/A'}</TableCell>
+                              })}
+                            </TableRow>
+                          ))}
+                        </>
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+                
+                {/* AI Hiring Advice Section */}
+                <Box sx={{ mt: 4, p: 3, bgcolor: alpha('#3b82f6', 0.1), borderRadius: 2, border: '1px solid', borderColor: alpha('#3b82f6', 0.2) }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                    <AutoFixHigh color="primary" />
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: 'white' }}>
+                      AI Hiring Recommendation
+                    </Typography>
+                    <Button
+                      size="small"
+                      onClick={fetchAiAdvice}
+                      disabled={loadingAdvice}
+                      sx={{ ml: 'auto' }}
+                    >
+                      {loadingAdvice ? <CircularProgress size={20} /> : 'Refresh'}
+                    </Button>
+                  </Box>
+                  {loadingAdvice ? (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 2 }}>
+                      <CircularProgress size={24} />
+                      <Typography color="textSecondary">Generating AI hiring advice...</Typography>
+                    </Box>
+                  ) : aiAdvice ? (
+                    <Paper sx={{ p: 2, bgcolor: alpha('#1e293b', 0.6), borderRadius: 1 }}>
+                      <Typography 
+                        variant="body1" 
+                        component="div"
+                        sx={{ 
+                          whiteSpace: 'pre-wrap', 
+                          color: '#e2e8f0',
+                          lineHeight: 1.8,
+                          '& strong': { color: '#60a5fa', fontWeight: 700 }
+                        }}
+                      >
+                        {aiAdvice}
+                      </Typography>
+                    </Paper>
+                  ) : (
+                    <Alert severity="info">
+                      Click "Refresh" to generate AI-powered hiring recommendations based on the candidate comparison data.
+                    </Alert>
+                  )}
+                </Box>
+              </Box>
+            ) : (
+              <Alert severity="warning" sx={{ mt: 2 }}>
+                Please select at least 2 candidates to compare.
+              </Alert>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setCompareDialogOpen(false)}>Close</Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Custom Report Request Dialog */}
+        <Dialog open={customReportDialogOpen} onClose={() => setCustomReportDialogOpen(false)} maxWidth="sm" fullWidth>
+          <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Description color="primary" />
+            Request Custom Report
+          </DialogTitle>
+          <DialogContent>
+            <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <FormControl fullWidth>
+                <InputLabel>Test</InputLabel>
+                <Select
+                  value={customReportForm.testId}
+                  label="Test"
+                  onChange={(e) => setCustomReportForm({ ...customReportForm, testId: e.target.value })}
+                >
+                  {tests.map(test => (
+                    <MenuItem key={test.id} value={test.id}>{test.title}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <TextField
+                label="Date Range"
+                placeholder="e.g., Last 30 days, Q1 2024, etc."
+                fullWidth
+                value={customReportForm.dateRange}
+                onChange={(e) => setCustomReportForm({ ...customReportForm, dateRange: e.target.value })}
+              />
+              <TextField
+                label="Skills to Include"
+                placeholder="e.g., Java, React, SQL (comma-separated)"
+                fullWidth
+                value={customReportForm.skills}
+                onChange={(e) => setCustomReportForm({ ...customReportForm, skills: e.target.value })}
+              />
+              <FormControl fullWidth>
+                <InputLabel>Report Format</InputLabel>
+                <Select
+                  value={customReportForm.format}
+                  label="Report Format"
+                  onChange={(e) => setCustomReportForm({ ...customReportForm, format: e.target.value })}
+                >
+                  <MenuItem value="PDF">PDF</MenuItem>
+                  <MenuItem value="EXCEL">Excel</MenuItem>
+                  <MenuItem value="CSV">CSV</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setCustomReportDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleCustomReportSubmit} variant="contained">
+              Submit Request
             </Button>
           </DialogActions>
         </Dialog>

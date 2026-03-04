@@ -29,7 +29,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgres
       JWT_SECRET: your-256-bit-secret-key-change-this-in-production-minimum-32-characters
       JWT_EXPIRATION: 86400000
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-AIzaSyAhdQFvTj1iBx-n236sR9mB9wkXfncO4Aw}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
     ports:
       - "8080:8080"
     depends_on:

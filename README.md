@@ -163,6 +163,10 @@ spring.datasource.password=postgres
 # JPA/Hibernate
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=false
+
+# Gemini AI Configuration (set via environment variable)
+# Get your API key from: https://makersuite.google.com/app/apikey
+gemini.api.key=${GEMINI_API_KEY:}
 ```
 
 ### Frontend (`.env`)
@@ -170,6 +174,20 @@ spring.jpa.show-sql=false
 ```env
 VITE_API_BASE_URL=http://localhost:8080/api
 ```
+
+### Docker Environment Variables
+
+When using Docker Compose, set the following environment variable:
+
+```bash
+# Set your Gemini API key before running docker-compose
+export GEMINI_API_KEY=your-gemini-api-key-here
+
+# Or create a .env file in the project root
+echo "GEMINI_API_KEY=your-gemini-api-key-here" > .env
+```
+
+**Important**: Get your Gemini API key from [Google AI Studio](https://makersuite.google.com/app/apikey). Never commit API keys to version control!
 
 ---
 
@@ -207,6 +225,103 @@ VITE_API_BASE_URL=http://localhost:8080/api
 | GET | `/api/candidate/tests` | Available tests for candidate |
 | POST | `/api/test/{testId}` | Start test session |
 | POST | `/api/test/{testId}/submit` | Submit test answers |
+
+---
+
+## 🤖 Recent AI & Scoring Enhancements
+
+### AI Test Generation (Gemini)
+
+- **Backend**  
+  - Service: `AiService` (Spring Boot) calls Google Gemini via `gemini.api.key` (`GEMINI_API_KEY` env var).  
+  - Endpoint: `POST /api/recruiter/generate-ai-test`  
+  - Request body now supports:
+    - **`skill`**: topic to assess (e.g. `"Java"`, `"React"`)
+    - **`difficulty`**: `"EASY" | "MEDIUM" | "HARD"`
+    - **`count`**: number of questions
+    - **`questionType`**: `"RANDOM" | "MCQ" | "TRUE_FALSE" | "SHORT_ANSWER"`
+- **Frontend (Recruiter Dashboard)**  
+  - `AI Generate` button opens **AI Test Generator** dialog.  
+  - You can choose:
+    - Skill / Topic  
+    - Difficulty  
+    - Number of questions  
+    - **Question type** (Random, MCQ only, True/False only, Short Answer only)
+
+### Candidate Comparison & AI Hiring Advice
+
+- **Comparison Matrix (UI)**  
+  - Tab: **Candidate Comparison** in `RecruiterDashboard`.  
+  - You can select **2+ completed sessions** and click **Compare X Candidates**.  
+  - The matrix shows:
+    - Candidate name  
+    - Test title  
+    - Score and percentage (`score/totalPoints`)  
+    - Submitted date  
+    - Skill breakdown (per-skill points)
+- **AI Hiring Recommendation**  
+  - Endpoint: `POST /api/recruiter/compare-candidates/ai-advice`  
+  - Request:
+    ```json
+    {
+      "sessionIds": [1, 2, 3]
+    }
+    ```
+  - Behavior:
+    - Collects scores, skill breakdown, and metadata for the selected sessions.
+    - Sends a structured prompt to Gemini to:
+      - Recommend who to hire (or multiple suitable candidates).
+      - Highlight strengths/weaknesses vs. peers.
+      - Provide a short, data-driven summary.
+  - Frontend:
+    - Shows an **AI Hiring Recommendation** section under the comparison table.
+    - Includes a **Refresh** button to regenerate advice.
+
+### Scoring & Test Session Logic
+
+- **Backend (TestService)**  
+  - `submitTest(...)` now:
+    - Recomputes **totalPoints** from the actual questions at submission time.
+    - Computes **score** by summing `question.points` only for correctly answered questions.
+    - Stores:
+      - `score`
+      - `totalPoints`
+      - `skillBreakdown` as JSON (skill → points).
+  - Answer checking:
+    - **MCQ / TRUE_FALSE / SHORT_ANSWER** are matched case-insensitively.
+    - MCQ uses the option text chosen by the candidate (from the React form).
+- **Frontend**  
+  - Candidate:
+    - `TestSession.jsx` sends answers as **option text** (for MCQ) / `"true"` / `"false"` / free text.
+  - Recruiter:
+    - Results and dashboards consistently show **`score/totalPoints`** and percentages using backend values.
+
+### Question Filters When Creating a Test
+
+- **Create / Edit Test dialog** in `RecruiterDashboard` includes:
+  - **Filter by Type**: All, MCQ, TRUE/FALSE, SHORT_ANSWER.
+  - **Filter by Difficulty**: All, EASY, MEDIUM, HARD.
+  - **Filter by Skill**: Free-text search.
+- These filters call `GET /api/recruiter/questions` with:
+  - `type`, `difficulty`, `skill` query params (backend already supports these).
+
+### Reports, PDF Export & Custom Reports
+
+- **Evaluation Reports tab** (Recruiter dashboard):
+  - You can open a **Candidate Performance Report** dialog with:
+    - Candidate info
+    - Test info
+    - Score / totalPoints / percentage
+    - Skill breakdown
+  - **Export to PDF**:
+    - Uses the browser’s print-to-PDF flow to export the report content.
+- **Request Custom Report**:
+  - Opens a dialog where recruiters can:
+    - Select a test
+    - Specify a date range
+    - Specify skills to include
+    - Choose output format (PDF / Excel / CSV)
+  - Currently implemented as a frontend workflow, with backend hooks ready for future extension.
 
 ---
 
