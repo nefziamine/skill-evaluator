@@ -60,6 +60,7 @@ function RecruiterDashboard() {
   const navigate = useNavigate()
   const [tabValue, setTabValue] = useState(0)
   const [tests, setTests] = useState([])
+  const [testSort, setTestSort] = useState('DEFAULT')
   const [questions, setQuestions] = useState([])
   const [analytics, setAnalytics] = useState({})
   const [loading, setLoading] = useState(true)
@@ -77,12 +78,12 @@ function RecruiterDashboard() {
   const [selectedTestToInvite, setSelectedTestToInvite] = useState(null)
   const [inviteFormData, setInviteFormData] = useState({ testId: '' })
   const [aiDialogOpen, setAiDialogOpen] = useState(false)
-  const [aiFormData, setAiFormData] = useState({ skill: 'Java', difficulty: 'MEDIUM', count: 5, questionType: 'RANDOM' })
+  const [aiFormData, setAiFormData] = useState({ skill: 'Java', difficulty: 'MEDIUM', count: 5, questionType: 'RANDOM', durationMinutes: 60 })
   const [generatingAi, setGeneratingAi] = useState(false)
   const [compareDialogOpen, setCompareDialogOpen] = useState(false)
   const [customReportDialogOpen, setCustomReportDialogOpen] = useState(false)
   const [customReportForm, setCustomReportForm] = useState({ testId: '', dateRange: '', skills: '', format: 'PDF' })
-  const [questionFilters, setQuestionFilters] = useState({ type: 'ALL', difficulty: 'ALL', skill: '' })
+  const [questionFilters, setQuestionFilters] = useState({ type: 'ALL', difficulty: 'ALL', skill: '', sortBy: 'DEFAULT' })
   const [aiAdvice, setAiAdvice] = useState('')
   const [loadingAdvice, setLoadingAdvice] = useState(false)
   const [testFormData, setTestFormData] = useState({
@@ -151,7 +152,7 @@ function RecruiterDashboard() {
     if (questionFilters.type !== 'ALL') params.append('type', questionFilters.type)
     if (questionFilters.difficulty !== 'ALL') params.append('difficulty', questionFilters.difficulty)
     if (questionFilters.skill) params.append('skill', questionFilters.skill)
-    
+
     const response = await api.get(`/recruiter/questions?${params.toString()}`)
     setQuestions(response.data)
   }
@@ -386,7 +387,7 @@ function RecruiterDashboard() {
 
   const handleExportPDF = () => {
     if (!reportDetails) return
-    
+
     // Simple PDF export using browser print functionality
     const printWindow = window.open('', '_blank')
     const content = `
@@ -420,9 +421,9 @@ function RecruiterDashboard() {
             <h2>Skill Breakdown</h2>
             <table>
               <tr><th>Skill</th><th>Score</th></tr>
-              ${reportDetails.skillBreakdown ? Object.entries(JSON.parse(reportDetails.skillBreakdown)).map(([skill, score]) => 
-                `<tr><td>${skill}</td><td>${score}</td></tr>`
-              ).join('') : '<tr><td colspan="2">No skill breakdown available</td></tr>'}
+              ${reportDetails.skillBreakdown ? Object.entries(JSON.parse(reportDetails.skillBreakdown)).map(([skill, score]) =>
+      `<tr><td>${skill}</td><td>${score}</td></tr>`
+    ).join('') : '<tr><td colspan="2">No skill breakdown available</td></tr>'}
             </table>
           </div>
         </body>
@@ -467,6 +468,32 @@ function RecruiterDashboard() {
     setInviteDialogOpen(true)
   }
 
+  const getTestDifficultyScore = (test) => {
+    if (!test.questions || test.questions.length === 0) return 0;
+    const weights = { HARD: 3, MEDIUM: 2, EASY: 1 };
+    const total = test.questions.reduce((sum, q) => sum + (weights[q.difficulty] || 0), 0);
+    return total / test.questions.length;
+  };
+
+  const getSortedTests = () => {
+    if (testSort === 'DEFAULT') return tests;
+    return [...tests].sort((a, b) => {
+      const diffA = getTestDifficultyScore(a);
+      const diffB = getTestDifficultyScore(b);
+      return testSort === 'DIFFICULTY_DESC' ? diffB - diffA : diffA - diffB;
+    });
+  };
+
+  const getSortedQuestions = () => {
+    if (!questionFilters.sortBy || questionFilters.sortBy === 'DEFAULT') return questions;
+    const weights = { HARD: 3, MEDIUM: 2, EASY: 1 };
+    return [...questions].sort((a, b) => {
+      const diffA = weights[a.difficulty] || 0;
+      const diffB = weights[b.difficulty] || 0;
+      return questionFilters.sortBy === 'DIFFICULTY_DESC' ? diffB - diffA : diffA - diffB;
+    });
+  };
+
   return (
     <Layout>
       <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
@@ -488,6 +515,14 @@ function RecruiterDashboard() {
               sx={{ borderRadius: 2, px: 3 }}
             >
               AI Generate
+            </Button>
+            <Button
+              variant="outlined"
+              color="info"
+              onClick={() => navigate('/talent')}
+              sx={{ borderRadius: 2, px: 3 }}
+            >
+              Talent Browser
             </Button>
             <Button
               variant="contained"
@@ -593,6 +628,27 @@ function RecruiterDashboard() {
 
         {tabValue === 0 && (
           <>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+              <FormControl sx={{ minWidth: 200 }}>
+                <InputLabel sx={{ color: '#94a3b8' }}>Sort Tests By Difficulty</InputLabel>
+                <Select
+                  value={testSort}
+                  label="Sort Tests By Difficulty"
+                  size="small"
+                  onChange={(e) => setTestSort(e.target.value)}
+                  sx={{
+                    color: 'white',
+                    '.MuiOutlinedInput-notchedOutline': { borderColor: alpha('#fff', 0.2) },
+                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: alpha('#fff', 0.3) },
+                    '.MuiSvgIcon-root': { color: '#94a3b8' }
+                  }}
+                >
+                  <MenuItem value="DEFAULT">Default</MenuItem>
+                  <MenuItem value="DIFFICULTY_DESC">Hardest to Easiest</MenuItem>
+                  <MenuItem value="DIFFICULTY_ASC">Easiest to Hardest</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
             <TableContainer component={Paper} sx={{
               bgcolor: alpha('#1e293b', 0.4),
               backdropFilter: 'blur(10px)',
@@ -611,7 +667,7 @@ function RecruiterDashboard() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {tests.map((test) => (
+                  {getSortedTests().map((test) => (
                     <TableRow key={test.id}>
                       <TableCell>{test.title}</TableCell>
                       <TableCell>{test.durationMinutes} min</TableCell>
@@ -676,6 +732,25 @@ function RecruiterDashboard() {
                     Delete Selected ({selectedQuestionIds.length})
                   </Button>
                 )}
+                <FormControl sx={{ minWidth: 200, ml: 2 }}>
+                  <InputLabel sx={{ color: '#94a3b8' }}>Sort By Difficulty</InputLabel>
+                  <Select
+                    value={questionFilters.sortBy || 'DEFAULT'}
+                    label="Sort By Difficulty"
+                    size="small"
+                    onChange={(e) => setQuestionFilters({ ...questionFilters, sortBy: e.target.value })}
+                    sx={{
+                      color: 'white',
+                      '.MuiOutlinedInput-notchedOutline': { borderColor: alpha('#fff', 0.2) },
+                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: alpha('#fff', 0.3) },
+                      '.MuiSvgIcon-root': { color: '#94a3b8' }
+                    }}
+                  >
+                    <MenuItem value="DEFAULT">Default</MenuItem>
+                    <MenuItem value="DIFFICULTY_DESC">Hardest to Easiest</MenuItem>
+                    <MenuItem value="DIFFICULTY_ASC">Easiest to Hardest</MenuItem>
+                  </Select>
+                </FormControl>
               </Box>
               <Button
                 variant="contained"
@@ -712,7 +787,7 @@ function RecruiterDashboard() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {questions.map((question) => (
+                  {getSortedQuestions().map((question) => (
                     <TableRow key={question.id} selected={selectedQuestionIds.includes(question.id)} sx={{ '&:hover': { bgcolor: alpha('#fff', 0.02) } }}>
                       <TableCell padding="checkbox">
                         <Checkbox
@@ -780,7 +855,7 @@ function RecruiterDashboard() {
                 startIcon={<BarChart />}
                 variant="contained"
                 disabled={selectedSessions.length < 2}
-                onClick={() => setCompareDialogOpen(true)}
+                onClick={handleCompareCandidates}
                 sx={{ borderRadius: 2, fontWeight: 700 }}
               >
                 Compare {selectedSessions.length} Candidates
@@ -907,9 +982,9 @@ function RecruiterDashboard() {
                     <Typography variant="body2" sx={{ opacity: 0.9, mb: 1 }}>Avg. Hiring Time: 12 days</Typography>
                     <Typography variant="body2" sx={{ opacity: 0.9, mb: 1 }}>Candidate ROI: +24%</Typography>
                     <Typography variant="body2" sx={{ opacity: 0.9, mb: 3 }}>Top Performer Accuracy: 88%</Typography>
-                    <Button 
-                      fullWidth 
-                      variant="contained" 
+                    <Button
+                      fullWidth
+                      variant="contained"
                       onClick={() => setCustomReportDialogOpen(true)}
                       sx={{ bgcolor: 'white', color: 'primary.main', '&:hover': { bgcolor: '#f5f5f5' } }}
                     >
@@ -1038,8 +1113,22 @@ function RecruiterDashboard() {
                 <Grid container spacing={3} sx={{ mb: 4 }}>
                   <Grid item xs={12} md={6}>
                     <Typography variant="subtitle2" color="textSecondary" sx={{ mb: 0.5 }}>CANDIDATE</Typography>
-                    <Typography variant="h6" sx={{ fontWeight: 700 }}>{reportDetails.candidate?.username}</Typography>
+                    <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                      {reportDetails.candidate?.firstName && reportDetails.candidate?.lastName
+                        ? `${reportDetails.candidate.firstName} ${reportDetails.candidate.lastName}`
+                        : reportDetails.candidate?.username}
+                    </Typography>
                     <Typography variant="body2" color="textSecondary">{reportDetails.candidate?.email}</Typography>
+                    {reportDetails.candidate?.phone && (
+                      <Typography variant="caption" display="block" color="textSecondary">
+                        Phone: {reportDetails.candidate.phone}
+                      </Typography>
+                    )}
+                    {reportDetails.candidate?.experience && (
+                      <Typography variant="caption" display="block" sx={{ color: 'primary.light', fontWeight: 600 }}>
+                        Exp: {reportDetails.candidate.experience} Years
+                      </Typography>
+                    )}
                   </Grid>
                   <Grid item xs={12} md={6}>
                     <Typography variant="subtitle2" color="textSecondary" sx={{ mb: 0.5 }}>TEST TITLE</Typography>
@@ -1089,9 +1178,9 @@ function RecruiterDashboard() {
           </DialogContent>
           <DialogActions sx={{ p: 3, bgcolor: 'background.default' }}>
             <Button onClick={() => setReportDetails(null)} sx={{ fontWeight: 600 }}>Close Report</Button>
-            <Button 
-              variant="contained" 
-              startIcon={<Description />} 
+            <Button
+              variant="contained"
+              startIcon={<Description />}
               onClick={handleExportPDF}
               sx={{ fontWeight: 600, borderRadius: 2 }}
             >
@@ -1491,6 +1580,14 @@ function RecruiterDashboard() {
                 value={aiFormData.count}
                 onChange={(e) => setAiFormData({ ...aiFormData, count: parseInt(e.target.value) })}
               />
+              <TextField
+                label="Duration (Minutes)"
+                type="number"
+                fullWidth
+                InputProps={{ inputProps: { min: 5, max: 180 } }}
+                value={aiFormData.durationMinutes}
+                onChange={(e) => setAiFormData({ ...aiFormData, durationMinutes: parseInt(e.target.value) })}
+              />
               <FormControl fullWidth>
                 <InputLabel>Question Type</InputLabel>
                 <Select
@@ -1587,7 +1684,7 @@ function RecruiterDashboard() {
                     </TableBody>
                   </Table>
                 </TableContainer>
-                
+
                 {/* AI Hiring Advice Section */}
                 <Box sx={{ mt: 4, p: 3, bgcolor: alpha('#3b82f6', 0.1), borderRadius: 2, border: '1px solid', borderColor: alpha('#3b82f6', 0.2) }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
@@ -1611,11 +1708,11 @@ function RecruiterDashboard() {
                     </Box>
                   ) : aiAdvice ? (
                     <Paper sx={{ p: 2, bgcolor: alpha('#1e293b', 0.6), borderRadius: 1 }}>
-                      <Typography 
-                        variant="body1" 
+                      <Typography
+                        variant="body1"
                         component="div"
-                        sx={{ 
-                          whiteSpace: 'pre-wrap', 
+                        sx={{
+                          whiteSpace: 'pre-wrap',
                           color: '#e2e8f0',
                           lineHeight: 1.8,
                           '& strong': { color: '#60a5fa', fontWeight: 700 }

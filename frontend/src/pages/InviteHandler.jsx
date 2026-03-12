@@ -15,7 +15,7 @@ function InviteHandler() {
             localStorage.setItem('userRole', 'CANDIDATE')
 
             if (testId) {
-                navigate(`/test/${testId}`)
+                navigate(`/test/${testId}/profile`)
             } else {
                 navigate('/')
             }
@@ -23,7 +23,7 @@ function InviteHandler() {
     }, [token, testId, navigate])
 
     return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', bgcolor: '#020617' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', bgcolor: '#020617' }}>
             <CircularProgress sx={{ mb: 3 }} />
             <Typography variant="h6" color="white">Preparing your assessment...</Typography>
         </Box>

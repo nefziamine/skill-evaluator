@@ -112,13 +112,14 @@ public class TestService {
             throw new RuntimeException("Test session has expired");
         }
 
-        // Calculate score + totals from the actual questions at submission time (avoids stale/incorrect totals)
-        ScoreResult results = calculateScoreAndBreakdown(session.getTest(), answers);
+        // Calculate score and skill breakdown
+        Map<String, Map<String, Integer>> results = calculateScoreAndBreakdown(session.getTest(), answers);
+        Map<String, Integer> skillScores = results.get("skillScores");
+        int totalScore = skillScores.values().stream().mapToInt(Integer::intValue).sum();
 
         session.setAnswers(convertAnswersToJson(answers));
-        session.setScore(results.totalScore());
-        session.setTotalPoints(results.totalPoints());
-        session.setSkillBreakdown(convertMapToJson(results.skillScores()));
+        session.setScore(totalScore);
+        session.setSkillBreakdown(convertMapToJson(skillScores));
         session.setSubmittedAt(LocalDateTime.now());
         session.setIsCompleted(true);
         session.setStatus(autoSubmit ? "AUTO_SUBMITTED" : "SUBMITTED");
@@ -126,29 +127,22 @@ public class TestService {
         return testSessionRepository.save(session);
     }
 
-    private record ScoreResult(int totalScore, int totalPoints, Map<String, Integer> skillScores) {
-    }
-
-    private ScoreResult calculateScoreAndBreakdown(Test test, Map<Long, String> answers) {
+    private Map<String, Map<String, Integer>> calculateScoreAndBreakdown(Test test, Map<Long, String> answers) {
         Map<String, Integer> skillScores = new HashMap<>();
-        int totalScore = 0;
-        int totalPoints = 0;
 
         for (Question question : test.getQuestions()) {
             String skill = question.getSkill();
             skillScores.putIfAbsent(skill, 0);
 
-            int qPoints = question.getPoints() == null ? 0 : question.getPoints();
-            totalPoints += qPoints;
-
             String userAnswer = answers.get(question.getId());
-            if (userAnswer != null && !userAnswer.isBlank() && isAnswerCorrect(question, userAnswer)) {
-                skillScores.put(skill, skillScores.get(skill) + qPoints);
-                totalScore += qPoints;
+            if (userAnswer != null && isAnswerCorrect(question, userAnswer)) {
+                skillScores.put(skill, skillScores.get(skill) + question.getPoints());
             }
         }
 
-        return new ScoreResult(totalScore, totalPoints, skillScores);
+        Map<String, Map<String, Integer>> result = new HashMap<>();
+        result.put("skillScores", skillScores);
+        return result;
     }
 
     private String convertMapToJson(Map<String, Integer> map) {
@@ -167,93 +161,20 @@ public class TestService {
     }
 
     private boolean isAnswerCorrect(Question question, String userAnswer) {
-        String correctAnswer = normalizeAnswer(question.getCorrectAnswer());
-        String userAnswerNorm = normalizeAnswer(userAnswer);
+        String correctAnswer = question.getCorrectAnswer().trim();
+        String userAnswerTrimmed = userAnswer.trim();
 
         switch (question.getType()) {
             case MCQ:
-                return isMcqAnswerCorrect(question, correctAnswer, userAnswerNorm);
             case TRUE_FALSE:
-                return correctAnswer.equalsIgnoreCase(userAnswerNorm);
+                return correctAnswer.equalsIgnoreCase(userAnswerTrimmed);
             case SHORT_ANSWER:
                 // For short answers, do case-insensitive comparison
                 // In production, you might want more sophisticated matching
-                return correctAnswer.equalsIgnoreCase(userAnswerNorm);
+                return correctAnswer.equalsIgnoreCase(userAnswerTrimmed);
             default:
                 return false;
         }
-    }
-
-    private boolean isMcqAnswerCorrect(Question question, String correctAnswerNorm, String userAnswerNorm) {
-        if (correctAnswerNorm.isEmpty() || userAnswerNorm.isEmpty()) {
-            return false;
-        }
-
-        // 1) If both are already option text, compare directly
-        if (correctAnswerNorm.equalsIgnoreCase(userAnswerNorm)) {
-            return true;
-        }
-
-        // 2) Support A/B/C/D (or 1/2/3/4) style answers by mapping to option text
-        List<String> options = parseOptions(question.getOptions());
-        String correctFromLetter = mapChoiceToOption(options, correctAnswerNorm);
-        String userFromLetter = mapChoiceToOption(options, userAnswerNorm);
-
-        if (correctFromLetter != null && userAnswerNorm.equalsIgnoreCase(correctFromLetter)) {
-            return true;
-        }
-        if (userFromLetter != null && correctAnswerNorm.equalsIgnoreCase(userFromLetter)) {
-            return true;
-        }
-        if (correctFromLetter != null && userFromLetter != null) {
-            return correctFromLetter.equalsIgnoreCase(userFromLetter);
-        }
-
-        // 3) Fallback: compare against any option text case-insensitively
-        for (String opt : options) {
-            if (opt.equalsIgnoreCase(correctAnswerNorm) && opt.equalsIgnoreCase(userAnswerNorm)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static String normalizeAnswer(String s) {
-        if (s == null) return "";
-        // trim + collapse whitespace
-        return s.trim().replaceAll("\\s+", " ");
-    }
-
-    private static List<String> parseOptions(String optionsRaw) {
-        if (optionsRaw == null || optionsRaw.isBlank()) return List.of();
-        // Stored as comma-separated values
-        String[] parts = optionsRaw.split(",");
-        List<String> options = new ArrayList<>(parts.length);
-        for (String p : parts) {
-            String v = normalizeAnswer(p);
-            if (!v.isEmpty()) options.add(v);
-        }
-        return options;
-    }
-
-    private static String mapChoiceToOption(List<String> options, String choice) {
-        if (options == null || options.isEmpty() || choice == null) return null;
-        String c = normalizeAnswer(choice).toUpperCase(Locale.ROOT);
-
-        // A-D mapping
-        if (c.length() == 1) {
-            char ch = c.charAt(0);
-            if (ch >= 'A' && ch <= 'D') {
-                int idx = ch - 'A';
-                return idx < options.size() ? options.get(idx) : null;
-            }
-            if (ch >= '1' && ch <= '4') {
-                int idx = ch - '1';
-                return idx < options.size() ? options.get(idx) : null;
-            }
-        }
-        return null;
     }
 
     private String convertAnswersToJson(Map<Long, String> answers) {
@@ -263,21 +184,11 @@ public class TestService {
         for (Map.Entry<Long, String> entry : answers.entrySet()) {
             if (!first)
                 json.append(",");
-            json.append("\"").append(entry.getKey()).append("\":\"").append(escapeJson(entry.getValue())).append("\"");
+            json.append("\"").append(entry.getKey()).append("\":\"").append(entry.getValue()).append("\"");
             first = false;
         }
         json.append("}");
         return json.toString();
-    }
-
-    private static String escapeJson(String value) {
-        if (value == null) return "";
-        return value
-                .replace("\\", "\\\\")
-                .replace("\"", "\\\"")
-                .replace("\n", "\\n")
-                .replace("\r", "\\r")
-                .replace("\t", "\\t");
     }
 
     public List<TestSession> getCandidateSessions(String username) {

@@ -38,7 +38,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String username = tokenProvider.getUsernameFromToken(jwt);
 
                 // Load full User object from database
-                Optional<User> userOpt = userRepository.findByUsername(username);
+                Optional<User> userOpt = userRepository.findByUsername(username)
+                        .or(() -> userRepository.findByEmail(username));
                 if (userOpt.isPresent()) {
                     User user = userOpt.get();
 

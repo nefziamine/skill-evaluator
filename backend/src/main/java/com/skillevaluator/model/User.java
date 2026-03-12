@@ -47,6 +47,31 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Boolean credentialsNonExpired = true;
 
+    // Profile Information
+    @Column
+    private String firstName;
+
+    @Column
+    private String lastName;
+
+    @Column
+    private String phone;
+
+    @Column
+    private String skills;
+
+    @Column
+    private String experience;
+
+    @Column
+    private String linkedinUrl;
+
+    @Column
+    private String githubUrl;
+
+    @Column
+    private String portfolioUrl;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.name()));
@@ -72,4 +97,3 @@ public class User implements UserDetails {
         return enabled;
     }
 }
-

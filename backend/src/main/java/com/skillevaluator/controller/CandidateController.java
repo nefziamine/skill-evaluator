@@ -3,6 +3,7 @@ package com.skillevaluator.controller;
 import com.skillevaluator.dto.TestSessionResponse;
 import com.skillevaluator.dto.TestSubmissionRequest;
 import com.skillevaluator.model.*;
+import com.skillevaluator.repository.UserRepository;
 import com.skillevaluator.repository.TestSessionRepository;
 import com.skillevaluator.service.TestService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -25,7 +27,63 @@ public class CandidateController {
     private TestService testService;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private TestSessionRepository testSessionRepository;
+
+    // ========== CANDIDATE PROFILE ==========
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentCandidate(Authentication authentication) {
+        if (authentication == null || authentication.getPrincipal() == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "Not authenticated"));
+        }
+        User candidate = (User) authentication.getPrincipal();
+        candidate.setPassword(null);
+        return ResponseEntity.ok(candidate);
+    }
+
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateCandidateProfile(@RequestBody Map<String, Object> profileData,
+            Authentication authentication) {
+        if (authentication == null || authentication.getPrincipal() == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "Not authenticated"));
+        }
+
+        User candidate = (User) authentication.getPrincipal();
+
+        Object fName = profileData.get("firstName");
+        Object lName = profileData.get("lastName");
+
+        if (fName == null || fName.toString().trim().isEmpty() || lName == null || lName.toString().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "First and Last names are required"));
+        }
+
+        candidate.setFirstName(fName.toString().trim());
+        candidate.setLastName(lName.toString().trim());
+
+        if (profileData.get("phone") != null)
+            candidate.setPhone(profileData.get("phone").toString().trim());
+        if (profileData.get("skills") != null)
+            candidate.setSkills(profileData.get("skills").toString().trim());
+        if (profileData.get("experience") != null)
+            candidate.setExperience(profileData.get("experience").toString().trim());
+        if (profileData.get("linkedinUrl") != null)
+            candidate.setLinkedinUrl(profileData.get("linkedinUrl").toString().trim());
+        if (profileData.get("githubUrl") != null)
+            candidate.setGithubUrl(profileData.get("githubUrl").toString().trim());
+        if (profileData.get("portfolioUrl") != null)
+            candidate.setPortfolioUrl(profileData.get("portfolioUrl").toString().trim());
+
+        userRepository.save(candidate);
+
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("message", "Profile updated successfully");
+        resp.put("user", candidate);
+        candidate.setPassword(null);
+        return ResponseEntity.ok(resp);
+    }
 
     @GetMapping("/tests")
     public ResponseEntity<List<Test>> getAvailableTests() {

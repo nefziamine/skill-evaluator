@@ -22,6 +22,7 @@ import java.util.Optional;
 import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.springframework.security.core.GrantedAuthority;
 
 @RestController
 @RequestMapping("/api/recruiter")
@@ -66,13 +67,18 @@ public class RecruiterController {
             User creator = (User) authentication.getPrincipal();
 
             // 1. Generate questions via AI
-            List<Question> generatedQuestions = aiService.generateQuestions(skill, difficulty, questionCount, questionType);
+            List<Question> generatedQuestions = aiService.generateQuestions(skill, difficulty, questionCount,
+                    questionType);
 
             // 2. Wrap into a Test
             Test test = new Test();
             test.setTitle("AI Generated: " + skill + " (" + difficulty + ")");
             test.setDescription("Automatically generated assessment for " + skill + " skills.");
-            test.setDurationMinutes(questionCount * 2); // 2 mins per question
+
+            int duration = data.containsKey("durationMinutes")
+                    ? Integer.parseInt(data.get("durationMinutes").toString())
+                    : questionCount * 2;
+            test.setDurationMinutes(duration);
             test.setCreatedBy(creator);
             test.setIsActive(true);
             test.setCreatedAt(java.time.LocalDateTime.now());
@@ -437,7 +443,7 @@ public class RecruiterController {
         try {
             @SuppressWarnings("unchecked")
             List<Object> sessionIdsRaw = (List<Object>) request.get("sessionIds");
-            
+
             if (sessionIdsRaw == null || sessionIdsRaw.size() < 2) {
                 return ResponseEntity.badRequest().body(Map.of("error", "At least 2 session IDs are required"));
             }
@@ -470,7 +476,7 @@ public class RecruiterController {
                 }
 
                 TestSession session = sessionOpt.get();
-                
+
                 // Check access
                 if (currentUser.getRole() != Role.ADMIN &&
                         !session.getTest().getCreatedBy().getId().equals(currentUser.getId())) {
@@ -486,13 +492,15 @@ public class RecruiterController {
                 candidate.put("testTitle", session.getTest().getTitle());
                 candidate.put("score", session.getScore());
                 candidate.put("totalPoints", session.getTotalPoints());
-                candidate.put("submittedAt", session.getSubmittedAt() != null ? session.getSubmittedAt().toString() : "N/A");
-                
+                candidate.put("submittedAt",
+                        session.getSubmittedAt() != null ? session.getSubmittedAt().toString() : "N/A");
+
                 if (session.getSkillBreakdown() != null && !session.getSkillBreakdown().isEmpty()) {
                     try {
                         ObjectMapper mapper = new ObjectMapper();
-                        Map<String, Integer> skillMap = mapper.readValue(session.getSkillBreakdown(), 
-                            new TypeReference<Map<String, Integer>>() {});
+                        Map<String, Integer> skillMap = mapper.readValue(session.getSkillBreakdown(),
+                                new TypeReference<Map<String, Integer>>() {
+                                });
                         candidate.put("skillBreakdown", skillMap);
                     } catch (Exception e) {
                         // Skip skill breakdown if parsing fails
@@ -503,22 +511,24 @@ public class RecruiterController {
             }
 
             if (candidateData.size() < 2) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Insufficient valid candidate data for comparison"));
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Insufficient valid candidate data for comparison"));
             }
 
             System.out.println("Generating hiring advice for " + candidateData.size() + " candidates");
             String advice = aiService.generateHiringAdvice(candidateData);
-            
+
             if (advice == null || advice.isEmpty()) {
                 return ResponseEntity.status(500).body(Map.of("error", "AI service returned empty advice"));
             }
-            
+
             return ResponseEntity.ok(Map.of("advice", advice));
 
         } catch (Exception e) {
             System.err.println("Error in hiring advice endpoint: " + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.status(500).body(Map.of("error", "Failed to generate hiring advice: " + e.getMessage()));
+            return ResponseEntity.status(500)
+                    .body(Map.of("error", "Failed to generate hiring advice: " + e.getMessage()));
         }
     }
 
@@ -634,5 +644,50 @@ public class RecruiterController {
         return ResponseEntity.ok(Map.of(
                 "message", "Profile updated successfully",
                 "user", currentUser));
+    }
+
+    // ========== TALENT BROWSER ==========
+
+    @GetMapping("/talent-browser")
+    public ResponseEntity<?> browseTalent(Authentication authentication) {
+        boolean canViewContact = authentication != null && authentication.getAuthorities() != null
+                && authentication.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .anyMatch(a -> a.equals("ROLE_RECRUITER") || a.equals("ROLE_ADMIN"));
+
+        List<User> candidates = userRepository.findAll().stream()
+                // Public directory: show ALL candidates across the platform
+                .filter(u -> u.getRole() == Role.CANDIDATE)
+                .toList();
+
+        record TalentProfile(
+                Long id,
+                String firstName,
+                String lastName,
+                String skills,
+                String experience,
+                // Contact / links (only for logged-in recruiters/admins)
+                String email,
+                String phone,
+                String linkedinUrl,
+                String githubUrl,
+                String portfolioUrl) {
+        }
+
+        List<TalentProfile> response = candidates.stream()
+                .map(u -> new TalentProfile(
+                        u.getId(),
+                        u.getFirstName(),
+                        u.getLastName(),
+                        u.getSkills(),
+                        u.getExperience(),
+                        canViewContact ? u.getEmail() : null,
+                        canViewContact ? u.getPhone() : null,
+                        canViewContact ? u.getLinkedinUrl() : null,
+                        canViewContact ? u.getGithubUrl() : null,
+                        canViewContact ? u.getPortfolioUrl() : null))
+                .toList();
+
+        return ResponseEntity.ok(response);
     }
 }

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Container,
   Typography,
@@ -12,6 +13,9 @@ import {
   Fade,
   useTheme,
   alpha,
+  Avatar,
+  Chip,
+  CircularProgress,
 } from '@mui/material'
 import {
   AdminPanelSettings,
@@ -22,12 +26,22 @@ import {
   AutoAwesome,
   Security,
   BarChart,
+  Verified,
+  Code,
+  Lock,
 } from '@mui/icons-material'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import api from '../services/api'
 
 function Home() {
   const theme = useTheme()
+  const isLoggedIn = !!localStorage.getItem('token')
+  const userRole = localStorage.getItem('userRole')
+  const canViewContact = isLoggedIn && (userRole === 'RECRUITER' || userRole === 'ADMIN')
+
+  const [talent, setTalent] = useState([])
+  const [talentLoading, setTalentLoading] = useState(true)
 
   const features = [
     {
@@ -46,6 +60,20 @@ function Home() {
       description: 'Comprehensive insights into candidate performance.',
     },
   ]
+
+  useEffect(() => {
+    const fetchTalent = async () => {
+      try {
+        const response = await api.get('/recruiter/talent-browser')
+        setTalent(Array.isArray(response.data) ? response.data.slice(0, 6) : [])
+      } catch (e) {
+        setTalent([])
+      } finally {
+        setTalentLoading(false)
+      }
+    }
+    fetchTalent()
+  }, [])
 
   return (
     <Box sx={{
@@ -428,6 +456,152 @@ function Home() {
                 </Grid>
               </Grid>
             </Paper>
+          </Container>
+        </Box>
+
+        {/* Public Talent Preview Section */}
+        <Box sx={{ py: 12 }}>
+          <Container maxWidth="lg">
+            <Box textAlign="center" mb={6}>
+              <Typography variant="h3" sx={{ fontWeight: 900, mb: 2, color: 'white' }}>
+                Explore Verified Talent
+              </Typography>
+              <Typography variant="h6" sx={{ color: '#94a3b8', maxWidth: 800, mx: 'auto' }}>
+                Browse a preview of candidates who completed assessments. Anyone can view profiles, but contact details are only available after recruiter login.
+              </Typography>
+            </Box>
+
+            {talentLoading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', my: 6 }}>
+                <CircularProgress sx={{ color: 'white' }} />
+              </Box>
+            ) : (
+              <Grid container spacing={3}>
+                {talent.map((candidate) => (
+                  <Grid item xs={12} md={6} lg={4} key={candidate.id}>
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        p: 3,
+                        height: '100%',
+                        bgcolor: alpha('#1e293b', 0.35),
+                        backdropFilter: 'blur(12px)',
+                        borderRadius: 6,
+                        border: '1px solid',
+                        borderColor: alpha('#fff', 0.06),
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          transform: 'translateY(-5px)',
+                          borderColor: alpha(theme.palette.primary.main, 0.35),
+                          bgcolor: alpha('#1e293b', 0.55),
+                        },
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                        <Avatar
+                          sx={{
+                            width: 56,
+                            height: 56,
+                            bgcolor: 'primary.main',
+                            fontWeight: 900,
+                          }}
+                        >
+                          {(candidate.firstName?.[0] || 'C')}
+                          {(candidate.lastName?.[0] || '')}
+                        </Avatar>
+                        <Chip
+                          icon={<Verified sx={{ fontSize: '14px !important' }} />}
+                          label="Verified"
+                          size="small"
+                          sx={{
+                            bgcolor: alpha('#10b981', 0.1),
+                            color: '#10b981',
+                            fontWeight: 800,
+                            border: '1px solid',
+                            borderColor: alpha('#10b981', 0.2),
+                          }}
+                        />
+                      </Box>
+
+                      <Typography variant="h6" sx={{ fontWeight: 900, color: 'white' }}>
+                        {(candidate.firstName || 'Candidate')} {candidate.lastName || ''}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+                        <Code sx={{ fontSize: 16 }} />
+                        {candidate.experience ? `${candidate.experience} Years Exp` : 'Candidate'}
+                      </Typography>
+
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
+                        {(candidate.skills || '')
+                          .split(',')
+                          .map((s) => s.trim())
+                          .filter(Boolean)
+                          .slice(0, 6)
+                          .map((skill) => (
+                            <Chip
+                              key={skill}
+                              label={skill}
+                              size="small"
+                              sx={{
+                                bgcolor: alpha('#fff', 0.05),
+                                color: '#94a3b8',
+                                border: '1px solid',
+                                borderColor: alpha('#fff', 0.06),
+                              }}
+                            />
+                          ))}
+                      </Box>
+
+                      <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        {canViewContact ? (
+                          <Typography variant="caption" sx={{ color: 'primary.light', fontWeight: 800 }}>
+                            {candidate.email}
+                          </Typography>
+                        ) : (
+                          <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 800 }}>
+                            <Lock sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'text-bottom' }} />
+                            Contact locked
+                          </Typography>
+                        )}
+                        <Button
+                          component={Link}
+                          to="/talent"
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            borderRadius: 2,
+                            textTransform: 'none',
+                            fontWeight: 800,
+                            borderColor: alpha('#fff', 0.2),
+                            color: 'white',
+                            '&:hover': { borderColor: 'white', bgcolor: alpha('#fff', 0.05) },
+                          }}
+                        >
+                          View more
+                        </Button>
+                      </Box>
+                    </Paper>
+                  </Grid>
+                ))}
+              </Grid>
+            )}
+
+            <Box textAlign="center" mt={6}>
+              <Button
+                component={Link}
+                to="/talent"
+                variant="contained"
+                sx={{
+                  borderRadius: 3,
+                  px: 6,
+                  py: 1.5,
+                  fontWeight: 900,
+                  textTransform: 'none',
+                }}
+              >
+                Browse Talent Directory
+              </Button>
+            </Box>
           </Container>
         </Box>
       </Box>

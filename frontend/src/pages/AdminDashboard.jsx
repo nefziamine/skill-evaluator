@@ -67,6 +67,11 @@ function AdminDashboard() {
     apiVersion: '1.0.0-PROD',
     lastBackup: '2 hours ago'
   })
+  const [taskDialogOpen, setTaskDialogOpen] = useState(false)
+  const [currentTask, setCurrentTask] = useState(null)
+  const [taskResult, setTaskResult] = useState(null)
+  const [broadcastMessage, setBroadcastMessage] = useState('')
+  const [taskLoading, setTaskLoading] = useState(false)
 
   const getRoleColor = (role) => {
     switch (role) {
@@ -225,12 +230,33 @@ function AdminDashboard() {
     }
   }
 
-  const runTask = async (task) => {
+  const handleOpenTask = (task) => {
+    setCurrentTask(task)
+    setTaskResult(null)
+    setBroadcastMessage('')
+    setTaskDialogOpen(true)
+  }
+
+  const executeTask = async () => {
+    if (currentTask === 'broadcast' && !broadcastMessage.trim()) {
+      setError('Broadcast message is required')
+      return
+    }
+    setTaskLoading(true)
+    setTaskResult(null)
     try {
-      const response = await api.post(`/admin/tasks/${task}`, {})
-      setSuccess(response.data.message)
+      const payload = currentTask === 'broadcast' ? { message: broadcastMessage } : {}
+      const response = await api.post(`/admin/tasks/${currentTask}`, payload)
+      setTaskResult(response.data?.message || 'Task completed successfully')
+      setSuccess(`${currentTask} completed successfully`)
+      if (currentTask === 'backup') {
+        fetchDiagnostics()
+      }
     } catch (err) {
-      setError(`Failed to perform ${task}`)
+      setError(`Failed to perform ${currentTask}`)
+      setTaskResult(`Error: Failed to perform ${currentTask}`)
+    } finally {
+      setTaskLoading(false)
     }
   }
 
@@ -334,13 +360,13 @@ function AdminDashboard() {
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, color: 'white' }}>Administrative Tasks</Typography>
               <Grid container spacing={2} sx={{ mt: 1 }}>
                 <Grid item xs={12} md={4}>
-                  <Button fullWidth variant="outlined" sx={{ py: 2, borderRadius: 2, borderColor: alpha('#fff', 0.1), color: '#94a3b8' }} onClick={() => runTask('audit')}>Audit System Logs</Button>
+                  <Button fullWidth variant="outlined" sx={{ py: 2, borderRadius: 2, borderColor: alpha('#fff', 0.1), color: '#94a3b8' }} onClick={() => handleOpenTask('audit')}>Audit System Logs</Button>
                 </Grid>
                 <Grid item xs={12} md={4}>
-                  <Button fullWidth variant="outlined" sx={{ py: 2, borderRadius: 2, borderColor: alpha('#fff', 0.1), color: '#94a3b8' }} onClick={() => runTask('backup')}>Backup Database</Button>
+                  <Button fullWidth variant="outlined" sx={{ py: 2, borderRadius: 2, borderColor: alpha('#fff', 0.1), color: '#94a3b8' }} onClick={() => handleOpenTask('backup')}>Backup Database</Button>
                 </Grid>
                 <Grid item xs={12} md={4}>
-                  <Button fullWidth variant="outlined" sx={{ py: 2, borderRadius: 2, borderColor: alpha('#fff', 0.1), color: '#94a3b8' }} onClick={() => runTask('broadcast')}>Email Broadcast</Button>
+                  <Button fullWidth variant="outlined" sx={{ py: 2, borderRadius: 2, borderColor: alpha('#fff', 0.1), color: '#94a3b8' }} onClick={() => handleOpenTask('broadcast')}>Email Broadcast</Button>
                 </Grid>
               </Grid>
             </Paper>
@@ -557,6 +583,56 @@ function AdminDashboard() {
             <Button onClick={handleSubmit} variant="contained" disabled={submitting}>
               {submitting ? 'Processing...' : (editingUser ? 'Update' : 'Create')}
             </Button>
+          </DialogActions>
+        </Dialog>
+
+        <Dialog open={taskDialogOpen} onClose={() => setTaskDialogOpen(false)} maxWidth="sm" fullWidth>
+          <DialogTitle sx={{ fontWeight: 700, textTransform: 'capitalize' }}>
+            {currentTask === 'audit' ? 'Audit System Logs' : currentTask === 'backup' ? 'Backup Database' : 'Email Broadcast'}
+          </DialogTitle>
+          <DialogContent>
+            <Box sx={{ mt: 2 }}>
+              {currentTask === 'broadcast' && !taskResult && (
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={4}
+                  label="Broadcast Message"
+                  placeholder="Enter message to send to all active users..."
+                  value={broadcastMessage}
+                  onChange={(e) => setBroadcastMessage(e.target.value)}
+                  disabled={taskLoading}
+                  sx={{ mb: 2 }}
+                />
+              )}
+              {currentTask === 'audit' && !taskResult && (
+                <Typography>Are you sure you want to generate a new system audit report? This may take a few moments.</Typography>
+              )}
+              {currentTask === 'backup' && !taskResult && (
+                <Typography>Are you sure you want to trigger a manual database backup? The process will run in the background.</Typography>
+              )}
+              {taskLoading && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
+                  <Refresh sx={{ animation: 'spin 2s linear infinite' }} />
+                  <Typography>Processing {currentTask} task...</Typography>
+                </Box>
+              )}
+              {taskResult && (
+                <Alert severity={taskResult.includes('Error') ? 'error' : 'success'} sx={{ mt: 2 }}>
+                  {taskResult}
+                </Alert>
+              )}
+            </Box>
+          </DialogContent>
+          <DialogActions sx={{ p: 3 }}>
+            <Button onClick={() => setTaskDialogOpen(false)}>
+              {taskResult ? 'Close' : 'Cancel'}
+            </Button>
+            {!taskResult && (
+              <Button onClick={executeTask} variant="contained" disabled={taskLoading || (currentTask === 'broadcast' && !broadcastMessage)}>
+                Run Task
+              </Button>
+            )}
           </DialogActions>
         </Dialog>
       </Container>

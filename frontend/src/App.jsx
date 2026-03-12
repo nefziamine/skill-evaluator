@@ -12,6 +12,7 @@ import TestSession from './pages/TestSession'
 import TestResults from './pages/TestResults'
 import CandidateResults from './pages/CandidateResults'
 import InviteHandler from './pages/InviteHandler'
+import CandidateProfile from './pages/CandidateProfile'
 import SuccessResults from './pages/SuccessResults'
 import HowItWorksPage from './pages/HowItWorksPage'
 import BrowseTalent from './pages/BrowseTalent'
@@ -132,6 +133,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <TestSession />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/test/:testId/profile"
+            element={
+              <ProtectedRoute>
+                <CandidateProfile />
               </ProtectedRoute>
             }
           />

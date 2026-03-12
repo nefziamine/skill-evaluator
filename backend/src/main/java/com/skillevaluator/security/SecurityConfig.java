@@ -71,10 +71,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                         // Recruiter endpoints
+                        .requestMatchers("/api/recruiter/talent-browser").permitAll()
                         .requestMatchers("/api/recruiter/**").hasAnyRole("RECRUITER", "ADMIN")
 
                         // Candidate endpoints
-                        .requestMatchers("/api/candidate/**").hasAnyRole("CANDIDATE", "RECRUITER", "ADMIN")
+                        .requestMatchers("/api/candidate/**").authenticated()
 
                         // All other requests require authentication
                         .anyRequest().authenticated())

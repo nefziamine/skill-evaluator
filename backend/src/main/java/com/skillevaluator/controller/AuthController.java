@@ -8,6 +8,9 @@ import com.skillevaluator.model.User;
 import com.skillevaluator.repository.UserRepository;
 import com.skillevaluator.security.JwtTokenProvider;
 import jakarta.validation.Valid;
+
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -87,4 +90,18 @@ public class AuthController {
 
         return ResponseEntity.ok("User registered successfully!");
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(401).body("Not authenticated");
+        }
+        String identifier = authentication.getName();
+        User user = userRepository.findByUsername(identifier)
+                .or(() -> userRepository.findByEmail(identifier))
+                .orElseThrow(() -> new RuntimeException("User not found: " + identifier));
+        user.setPassword(null);
+        return ResponseEntity.ok(user);
+    }
+
 }

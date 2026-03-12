@@ -168,8 +168,8 @@ public class AiService {
             q.setText(String.format("[FALLBACK] %s Question %d: Technical insight about %s.", difficulty, i, skill));
             
             if (qType == QuestionType.MCQ) {
-                q.setOptions("Option A, Option B, Option C, Option D");
-                q.setCorrectAnswer("Option A");
+            q.setOptions("Option A, Option B, Option C, Option D");
+            q.setCorrectAnswer("Option A");
             } else if (qType == QuestionType.TRUE_FALSE) {
                 q.setOptions("");
                 q.setCorrectAnswer("true");
