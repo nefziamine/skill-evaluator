@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
+<<<<<<< HEAD
 import { AppBar, Toolbar, Typography, Button, Box, Container, useTheme, useScrollTrigger } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { VerifiedUser } from '@mui/icons-material';
+=======
+import { AppBar, Toolbar, Typography, Button, Box, Container, useTheme, useScrollTrigger, Menu, MenuItem } from '@mui/material';
+import { Link, useNavigate } from 'react-router-dom';
+import { VerifiedUser, KeyboardArrowDown } from '@mui/icons-material';
+>>>>>>> a560bc6 (Initial commit)
 
 function ScrollElevation({ children }) {
     const trigger = useScrollTrigger({
@@ -27,6 +33,18 @@ export default function TopNav() {
     const isLoggedIn = !!localStorage.getItem('token');
     const role = localStorage.getItem('userRole');
 
+<<<<<<< HEAD
+=======
+    const [anchorEl, setAnchorEl] = useState(null);
+    const open = Boolean(anchorEl);
+    const handleRecruiterClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+>>>>>>> a560bc6 (Initial commit)
     return (
         <ScrollElevation>
             <AppBar position="fixed" color="transparent" elevation={0}>
@@ -51,6 +69,7 @@ export default function TopNav() {
 
                         {/* Desktop Links */}
                         <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 4, alignItems: 'center', mr: 4 }}>
+<<<<<<< HEAD
                             {['Tests', 'AI Advanced', 'For Recruiters', 'How it works'].map((text) => (
                                 <Button
                                     key={text}
@@ -66,6 +85,53 @@ export default function TopNav() {
                                     {text}
                                 </Button>
                             ))}
+=======
+                            <Button
+                                component={Link}
+                                to="/tests"
+                                sx={{ color: 'text.secondary', fontWeight: 600, textTransform: 'none', '&:hover': { color: 'primary.main' } }}
+                            >
+                                Tests
+                            </Button>
+                            <Button
+                                sx={{ color: 'text.secondary', fontWeight: 600, textTransform: 'none', '&:hover': { color: 'primary.main' } }}
+                            >
+                                AI Advanced
+                            </Button>
+                            <Button
+                                onClick={handleRecruiterClick}
+                                endIcon={<KeyboardArrowDown />}
+                                sx={{ color: 'text.secondary', fontWeight: 600, textTransform: 'none', '&:hover': { color: 'primary.main' } }}
+                            >
+                                For Recruiters
+                            </Button>
+                            <Menu
+                                anchorEl={anchorEl}
+                                open={open}
+                                onClose={handleClose}
+                                PaperProps={{
+                                    sx: {
+                                        bgcolor: '#1e293b',
+                                        color: 'white',
+                                        border: '1px solid',
+                                        borderColor: 'rgba(255,255,255,0.1)',
+                                        mt: 1,
+                                        '& .MuiMenuItem-root': { fontWeight: 600, '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' } }
+                                    }
+                                }}
+                            >
+                                <MenuItem onClick={handleClose} component={Link} to="/talent">Browse Talent</MenuItem>
+                                <MenuItem onClick={handleClose} component={Link} to="/post-job">Post a Job</MenuItem>
+                                <MenuItem onClick={handleClose} component={Link} to="/enterprise">Enterprise</MenuItem>
+                            </Menu>
+                            <Button
+                                component={Link}
+                                to="/how-it-works"
+                                sx={{ color: 'text.secondary', fontWeight: 600, textTransform: 'none', '&:hover': { color: 'primary.main' } }}
+                            >
+                                How it works
+                            </Button>
+>>>>>>> a560bc6 (Initial commit)
                         </Box>
 
                         {/* Auth Buttons */}

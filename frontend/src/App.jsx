@@ -13,6 +13,13 @@ import TestResults from './pages/TestResults'
 import CandidateResults from './pages/CandidateResults'
 import InviteHandler from './pages/InviteHandler'
 import SuccessResults from './pages/SuccessResults'
+<<<<<<< HEAD
+=======
+import HowItWorksPage from './pages/HowItWorksPage'
+import BrowseTalent from './pages/BrowseTalent'
+import PostJob from './pages/PostJob'
+import Enterprise from './pages/Enterprise'
+>>>>>>> a560bc6 (Initial commit)
 
 const darkTheme = createTheme({
   palette: {
@@ -80,6 +87,13 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+<<<<<<< HEAD
+=======
+          <Route path="/how-it-works" element={<HowItWorksPage />} />
+          <Route path="/talent" element={<BrowseTalent />} />
+          <Route path="/post-job" element={<PostJob />} />
+          <Route path="/enterprise" element={<Enterprise />} />
+>>>>>>> a560bc6 (Initial commit)
           <Route path="/invite/:token" element={<InviteHandler />} />
           <Route
             path="/admin/dashboard"

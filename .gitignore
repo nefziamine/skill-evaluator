@@ -33,3 +33,11 @@ logs/
 
 # Docker
 docker-compose.override.yml
+<<<<<<< HEAD
+=======
+
+# Root node_modules and temp files
+node_modules/
+skill-evaluator.zip
+build_log.txt
+>>>>>>> a560bc6 (Initial commit)

@@ -34,6 +34,12 @@ function Footer() {
               <Link href="/login" sx={{ color: '#94a3b8', textDecoration: 'none', '&:hover': { color: 'white' } }}>
                 Authentication
               </Link>
+<<<<<<< HEAD
+=======
+              <Link href="/how-it-works" sx={{ color: '#94a3b8', textDecoration: 'none', '&:hover': { color: 'white' } }}>
+                How it Works
+              </Link>
+>>>>>>> a560bc6 (Initial commit)
               <Link href="/register" sx={{ color: '#94a3b8', textDecoration: 'none', '&:hover': { color: 'white' } }}>
                 Join Platform
               </Link>

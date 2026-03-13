@@ -25,6 +25,10 @@ export default function FooterLanding() {
                         <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 2 }}>Platform</Typography>
                         <Stack spacing={1}>
                             <Link href="/tests" color="text.secondary" underline="hover">Tests</Link>
+<<<<<<< HEAD
+=======
+                            <Link href="/how-it-works" color="text.secondary" underline="hover">How it Works</Link>
+>>>>>>> a560bc6 (Initial commit)
                             <Link href="#" color="text.secondary" underline="hover">AI Advanced</Link>
                             <Link href="#" color="text.secondary" underline="hover">Pricing</Link>
                         </Stack>
@@ -34,8 +38,13 @@ export default function FooterLanding() {
                         <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 2 }}>For Recruiters</Typography>
                         <Stack spacing={1}>
                             <Link href="/talent" color="text.secondary" underline="hover">Browse Talent</Link>
+<<<<<<< HEAD
                             <Link href="#" color="text.secondary" underline="hover">Post a Job</Link>
                             <Link href="#" color="text.secondary" underline="hover">Enterprise</Link>
+=======
+                            <Link href="/post-job" color="text.secondary" underline="hover">Post a Job</Link>
+                            <Link href="/enterprise" color="text.secondary" underline="hover">Enterprise</Link>
+>>>>>>> a560bc6 (Initial commit)
                         </Stack>
                     </Grid>
 

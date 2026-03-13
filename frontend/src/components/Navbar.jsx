@@ -55,6 +55,22 @@ function Navbar() {
             Skill Evaluator
           </Typography>
           <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
+<<<<<<< HEAD
+=======
+            <Button
+              component={Link}
+              to="/how-it-works"
+              sx={{
+                color: 'text.secondary',
+                textTransform: 'none',
+                fontWeight: 600,
+                display: { xs: 'none', sm: 'block' },
+                '&:hover': { color: 'primary.main' }
+              }}
+            >
+              How it Works
+            </Button>
+>>>>>>> a560bc6 (Initial commit)
             {token ? (
               <>
                 <Typography variant="body2" sx={{ color: '#94a3b8', mr: 2, display: { xs: 'none', md: 'block' } }}>
