@@ -582,7 +582,7 @@ public class RecruiterController {
             candidate = new User();
             candidate.setEmail(email);
             candidate.setUsername(email); // Use email as username
-            candidate.setPassword("invited"); // Placeholder
+            candidate.setPassword(passwordEncoder.encode("invited")); // Hash the placeholder password
             candidate.setRole(Role.CANDIDATE);
             candidate.setEnabled(true);
             candidate.setAccountNonExpired(true);

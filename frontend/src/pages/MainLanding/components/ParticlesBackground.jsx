@@ -22,8 +22,7 @@ export default function ParticlesBackground() {
                 detectsOn: "window",
                 events: {
                     onHover: {
-                        enable: true,
-                        mode: "repulse",
+                        enable: false,
                     },
                     resize: true,
                 },

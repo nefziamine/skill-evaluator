@@ -11,8 +11,12 @@ import {
   CircularProgress,
   alpha,
   useTheme,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material'
-import { AdminPanelSettings, Work, ArrowBack } from '@mui/icons-material'
+import { AdminPanelSettings, Work, ArrowBack, Visibility, VisibilityOff } from '@mui/icons-material'
 import api from '../services/api'
 
 function Login() {
@@ -26,6 +30,11 @@ function Login() {
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false)
+  const [resetEmail, setResetEmail] = useState('')
+  const [resetLoading, setResetLoading] = useState(false)
+  const [resetSuccess, setResetSuccess] = useState('')
   const navigate = useNavigate()
   const theme = useTheme()
 
@@ -68,6 +77,32 @@ function Login() {
       )
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleForgotPassword = async () => {
+    if (!resetEmail) {
+      setError('Please enter your admin email address')
+      return
+    }
+
+    setResetLoading(true)
+    setError('')
+    setResetSuccess('')
+
+    try {
+      await api.post('/auth/admin/forgot-password', { email: resetEmail })
+      setResetSuccess('Password reset instructions have been sent to your email.')
+      setResetEmail('')
+      setForgotPasswordOpen(false)
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+        err.response?.data ||
+        'Failed to send reset instructions. Please contact system administrator.'
+      )
+    } finally {
+      setResetLoading(false)
     }
   }
 
@@ -136,6 +171,21 @@ function Login() {
               </Alert>
             )}
 
+            {resetSuccess && (
+              <Alert
+                severity="success"
+                sx={{
+                  mb: 3,
+                  bgcolor: alpha(theme.palette.success.main, 0.1),
+                  color: theme.palette.success.light,
+                  border: '1px solid',
+                  borderColor: alpha(theme.palette.success.main, 0.2)
+                }}
+              >
+                {resetSuccess}
+              </Alert>
+            )}
+
             <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
               <TextField
                 margin="normal"
@@ -163,11 +213,21 @@ function Login() {
                 fullWidth
                 name="password"
                 label="Password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 id="password"
                 autoComplete="current-password"
                 value={formData.password}
                 onChange={handleChange}
+                InputProps={{
+                  endAdornment: (
+                    <Button
+                      onClick={() => setShowPassword(!showPassword)}
+                      sx={{ color: '#94a3b8', minWidth: 'auto', p: 1 }}
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </Button>
+                  ),
+                }}
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     color: 'white',
@@ -197,22 +257,61 @@ function Login() {
                 {loading ? <CircularProgress size={24} /> : 'Authenticate'}
               </Button>
 
-              {!isRoleAdmin && (
-                <Box sx={{ textAlign: 'center' }}>
-                  <Link to="/register" style={{ textDecoration: 'none' }}>
-                    <Typography variant="body2" sx={{ color: '#94a3b8', '&:hover': { color: 'white' } }}>
-                      Don't have an account? Sign Up as Recruiter
-                    </Typography>
-                  </Link>
+              {isRoleAdmin && (
+                <Box sx={{ textAlign: 'center', mt: 2 }}>
+                  <Button
+                    onClick={() => setForgotPasswordOpen(true)}
+                    sx={{ color: '#94a3b8', textTransform: 'none', fontSize: '0.875rem' }}
+                  >
+                    Forgot Admin Password?
+                  </Button>
                 </Box>
               )}
             </Box>
-          </Paper>
-        </Box>
-      </Container>
-    </Box>
-  )
-}
+        </Paper>
+      </Box>
+    </Container>
 
-export default Login
+    {/* Forgot Password Dialog */}
+    <Dialog open={forgotPasswordOpen} onClose={() => setForgotPasswordOpen(false)} maxWidth="sm" fullWidth>
+      <DialogTitle sx={{ bgcolor: '#1e293b', color: 'white' }}>
+        Admin Password Recovery
+      </DialogTitle>
+      <DialogContent sx={{ bgcolor: '#1e293b', color: 'white', p: 3 }}>
+        <Typography variant="body2" sx={{ mb: 2, color: '#94a3b8' }}>
+          Enter your admin email address to receive password reset instructions.
+        </Typography>
+        <TextField
+          fullWidth
+          label="Admin Email"
+          type="email"
+          value={resetEmail}
+          onChange={(e) => setResetEmail(e.target.value)}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              color: 'white',
+              '& fieldset': { borderColor: alpha('#fff', 0.2) },
+              '&:hover fieldset': { borderColor: alpha('#fff', 0.3) },
+            },
+            '& .MuiInputLabel-root': { color: '#94a3b8' }
+          }}
+        />
+      </DialogContent>
+      <DialogActions sx={{ bgcolor: '#1e293b', p: 3 }}>
+        <Button onClick={() => setForgotPasswordOpen(false)} sx={{ color: '#94a3b8' }}>
+          Cancel
+        </Button>
+        <Button
+          onClick={handleForgotPassword}
+          variant="contained"
+          color="secondary"
+          disabled={resetLoading}
+        >
+          {resetLoading ? <CircularProgress size={20} /> : 'Send Reset Instructions'}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  </Box>
+)
 
+export default Login;

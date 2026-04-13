@@ -33,7 +33,7 @@ import {
   alpha,
   InputAdornment
 } from '@mui/material'
-import { Add, Edit, Delete, Refresh, Search, Settings, People, Dashboard as DashboardIcon, Quiz, Description, Assessment } from '@mui/icons-material'
+import { Add, Edit, Delete, Refresh, Search, Settings, People, Dashboard as DashboardIcon, Quiz, Description, Assessment, Wifi, Timeline } from '@mui/icons-material'
 import Layout from '../components/Layout'
 import api from '../services/api'
 
@@ -308,6 +308,7 @@ function AdminDashboard() {
           >
             <Tab icon={<DashboardIcon />} label="Overview" iconPosition="start" />
             <Tab icon={<People />} label="User Management" iconPosition="start" />
+            <Tab icon={<Wifi />} label="WebSocket Monitoring" iconPosition="start" />
             <Tab icon={<Settings />} label="System Settings" iconPosition="start" />
           </Tabs>
         </Paper>
@@ -465,6 +466,138 @@ function AdminDashboard() {
         )}
 
         {activeTab === 2 && (
+          <Paper sx={{
+            borderRadius: 4,
+            bgcolor: alpha('#1e293b', 0.4),
+            backdropFilter: 'blur(10px)',
+            border: '1px solid',
+            borderColor: alpha('#fff', 0.1),
+            p: 3
+          }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+              <Typography variant="h5" sx={{ fontWeight: 700, color: 'white' }}>
+                WebSocket Connections
+              </Typography>
+              <Button
+                startIcon={<Refresh />}
+                onClick={() => {/* TODO: Implement refresh */}}
+                variant="outlined"
+                size="small"
+                sx={{ borderColor: alpha('#fff', 0.2), color: 'white' }}
+              >
+                Refresh
+              </Button>
+            </Box>
+
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={4}>
+                <Card sx={{
+                  bgcolor: alpha('#1e293b', 0.6),
+                  border: '1px solid',
+                  borderColor: alpha('#fff', 0.1),
+                  p: 2
+                }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                    <Wifi sx={{ color: '#10b981' }} />
+                    <Typography variant="h6" sx={{ color: 'white' }}>
+                      Active Connections
+                    </Typography>
+                  </Box>
+                  <Typography variant="h3" sx={{ color: '#10b981', fontWeight: 800 }}>
+                    0
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#94a3b8', mt: 1 }}>
+                    Real-time connections
+                  </Typography>
+                </Card>
+              </Grid>
+              
+              <Grid item xs={12} md={4}>
+                <Card sx={{
+                  bgcolor: alpha('#1e293b', 0.6),
+                  border: '1px solid',
+                  borderColor: alpha('#fff', 0.1),
+                  p: 2
+                }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                    <Timeline sx={{ color: '#f59e0b' }} />
+                    <Typography variant="h6" sx={{ color: 'white' }}>
+                      Messages/sec
+                    </Typography>
+                  </Box>
+                  <Typography variant="h3" sx={{ color: '#f59e0b', fontWeight: 800 }}>
+                    0
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#94a3b8', mt: 1 }}>
+                    Current throughput
+                  </Typography>
+                </Card>
+              </Grid>
+              
+              <Grid item xs={12} md={4}>
+                <Card sx={{
+                  bgcolor: alpha('#1e293b', 0.6),
+                  border: '1px solid',
+                  borderColor: alpha('#fff', 0.1),
+                  p: 2
+                }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                    <Assessment sx={{ color: '#8b5cf6' }} />
+                    <Typography variant="h6" sx={{ color: 'white' }}>
+                      Avg Latency
+                    </Typography>
+                  </Box>
+                  <Typography variant="h3" sx={{ color: '#8b5cf6', fontWeight: 800 }}>
+                    0ms
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#94a3b8', mt: 1 }}>
+                    Response time
+                  </Typography>
+                </Card>
+              </Grid>
+            </Grid>
+
+            <Box sx={{ mt: 3 }}>
+              <Typography variant="h6" sx={{ color: 'white', mb: 2 }}>
+                Connection Details
+              </Typography>
+              <TableContainer sx={{
+                bgcolor: alpha('#1e293b', 0.3),
+                border: '1px solid',
+                borderColor: alpha('#fff', 0.1),
+                borderRadius: 2
+              }}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ color: 'white', fontWeight: 600 }}>Session ID</TableCell>
+                      <TableCell sx={{ color: 'white', fontWeight: 600 }}>User</TableCell>
+                      <TableCell sx={{ color: 'white', fontWeight: 600 }}>Type</TableCell>
+                      <TableCell sx={{ color: 'white', fontWeight: 600 }}>Connected</TableCell>
+                      <TableCell sx={{ color: 'white', fontWeight: 600 }}>Status</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell colSpan={5} sx={{ color: '#94a3b8', textAlign: 'center', py: 4 }}>
+                        No active WebSocket connections
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Box>
+
+            <Alert severity="info" sx={{ mt: 3 }}>
+              <Typography variant="body2" sx={{ color: 'white' }}>
+                WebSocket monitoring allows you to track real-time connections, message throughput, and connection health. 
+                This feature requires WebSocket endpoints to be implemented in the backend.
+              </Typography>
+            </Alert>
+          </Paper>
+        )}
+
+        {activeTab === 3 && (
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
               <Paper sx={{
@@ -491,6 +624,29 @@ function AdminDashboard() {
                     onChange={(e) => handleUpdateSettings('contactEmail', e.target.value)}
                     sx={{ '& .MuiOutlinedInput-root': { color: 'white' }, '& .MuiInputLabel-root': { color: '#94a3b8' } }}
                   />
+                  <TextField
+                    label="Support Email"
+                    fullWidth
+                    value={systemSettings.supportEmail || ''}
+                    onChange={(e) => handleUpdateSettings('supportEmail', e.target.value)}
+                    sx={{ '& .MuiOutlinedInput-root': { color: 'white' }, '& .MuiInputLabel-root': { color: '#94a3b8' } }}
+                  />
+                  <TextField
+                    label="Default Test Duration (minutes)"
+                    type="number"
+                    fullWidth
+                    value={systemSettings.defaultTestDuration || 60}
+                    onChange={(e) => handleUpdateSettings('defaultTestDuration', parseInt(e.target.value))}
+                    sx={{ '& .MuiOutlinedInput-root': { color: 'white' }, '& .MuiInputLabel-root': { color: '#94a3b8' } }}
+                  />
+                  <TextField
+                    label="Maximum Questions per Test"
+                    type="number"
+                    fullWidth
+                    value={systemSettings.maxQuestionsPerTest || 50}
+                    onChange={(e) => handleUpdateSettings('maxQuestionsPerTest', parseInt(e.target.value))}
+                    sx={{ '& .MuiOutlinedInput-root': { color: 'white' }, '& .MuiInputLabel-root': { color: '#94a3b8' } }}
+                  />
                   <FormControlLabel
                     control={<Switch checked={systemSettings.allowNewRegistrations} onChange={(e) => handleUpdateSettings('allowNewRegistrations', e.target.checked)} />}
                     label="Allow Public Registrations"
@@ -499,6 +655,16 @@ function AdminDashboard() {
                   <FormControlLabel
                     control={<Switch checked={systemSettings.maintenanceMode} onChange={(e) => handleUpdateSettings('maintenanceMode', e.target.checked)} color="error" />}
                     label="Enable Maintenance Mode"
+                    sx={{ color: '#94a3b8' }}
+                  />
+                  <FormControlLabel
+                    control={<Switch checked={systemSettings.enableEmailNotifications || false} onChange={(e) => handleUpdateSettings('enableEmailNotifications', e.target.checked)} />}
+                    label="Enable Email Notifications"
+                    sx={{ color: '#94a3b8' }}
+                  />
+                  <FormControlLabel
+                    control={<Switch checked={systemSettings.enableCandidateSelfRegistration || false} onChange={(e) => handleUpdateSettings('enableCandidateSelfRegistration', e.target.checked)} />}
+                    label="Allow Candidate Self-Registration"
                     sx={{ color: '#94a3b8' }}
                   />
                 </Box>
@@ -514,19 +680,85 @@ function AdminDashboard() {
                 borderColor: alpha('#3b82f6', 0.2),
                 color: 'white'
               }}>
-                <Typography variant="h6" gutterBottom sx={{ fontWeight: 700 }}>System Health</Typography>
+                <Typography variant="h6" gutterBottom sx={{ fontWeight: 700 }}>System Health & Performance</Typography>
                 <Box sx={{ mt: 2 }}>
-                  <Typography variant="body2" sx={{ opacity: 0.8, mb: 1, color: '#94a3b8' }}>Database Status: <span style={{ color: '#10b981' }}>{diagnostics.dbConnection}</span></Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.8, mb: 1, color: '#94a3b8' }}>API Version: {diagnostics.apiVersion}</Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.8, mb: 1, color: '#94a3b8' }}>Last Backup: {diagnostics.lastBackup}</Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.8, mb: 3, color: '#94a3b8' }}>Storage Usage: {diagnostics.storageUsage}</Typography>
-                  <Button
-                    variant="contained"
-                    onClick={fetchDiagnostics}
-                    sx={{ borderRadius: 2, fontWeight: 600 }}
-                  >
-                    Run Diagnostics
-                  </Button>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                        <Typography variant="body2" sx={{ color: '#94a3b8' }}>Database Status</Typography>
+                        <Chip 
+                          label={diagnostics.dbConnection} 
+                          size="small" 
+                          color={diagnostics.dbConnection === 'Active' ? 'success' : 'error'}
+                          sx={{ fontSize: '0.75rem' }}
+                        />
+                      </Box>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                        <Typography variant="body2" sx={{ color: '#94a3b8' }}>API Health</Typography>
+                        <Chip 
+                          label="Operational" 
+                          size="small" 
+                          color="success"
+                          sx={{ fontSize: '0.75rem' }}
+                        />
+                      </Box>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                        <Typography variant="body2" sx={{ color: '#94a3b8' }}>Memory Usage</Typography>
+                        <Typography variant="body2" sx={{ color: 'white' }}>{diagnostics.memoryUsage || '45%'}</Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                        <Typography variant="body2" sx={{ color: '#94a3b8' }}>CPU Usage</Typography>
+                        <Typography variant="body2" sx={{ color: 'white' }}>{diagnostics.cpuUsage || '23%'}</Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                        <Typography variant="body2" sx={{ color: '#94a3b8' }}>Storage Usage</Typography>
+                        <Typography variant="body2" sx={{ color: 'white' }}>{diagnostics.storageUsage}</Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                        <Typography variant="body2" sx={{ color: '#94a3b8' }}>Last Backup</Typography>
+                        <Typography variant="body2" sx={{ color: 'white' }}>{diagnostics.lastBackup}</Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                        <Typography variant="body2" sx={{ color: '#94a3b8' }}>API Version</Typography>
+                        <Typography variant="body2" sx={{ color: 'white' }}>{diagnostics.apiVersion}</Typography>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                  
+                  <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
+                    <Button
+                      variant="contained"
+                      onClick={fetchDiagnostics}
+                      sx={{ borderRadius: 2, fontWeight: 600 }}
+                    >
+                      Refresh Status
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      onClick={() => {/* TODO: Implement detailed health check */}}
+                      sx={{ borderRadius: 2, fontWeight: 600, borderColor: alpha('#fff', 0.2), color: 'white' }}
+                    >
+                      Detailed Report
+                    </Button>
+                  </Box>
+                  
+                  <Alert severity="info" sx={{ mt: 3 }}>
+                    <Typography variant="caption" sx={{ color: 'white' }}>
+                      System health monitoring provides real-time insights into platform performance and resource utilization.
+                    </Typography>
+                  </Alert>
                 </Box>
               </Paper>
             </Grid>

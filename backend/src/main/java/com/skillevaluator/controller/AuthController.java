@@ -9,7 +9,7 @@ import com.skillevaluator.repository.UserRepository;
 import com.skillevaluator.security.JwtTokenProvider;
 import jakarta.validation.Valid;
 
-//import java.util.Map;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -102,6 +102,53 @@ public class AuthController {
                 .orElseThrow(() -> new RuntimeException("User not found: " + identifier));
         user.setPassword(null);
         return ResponseEntity.ok(user);
+    }
+
+    @PostMapping("/candidate/setup-password")
+    public ResponseEntity<?> setupCandidatePassword(@RequestBody Map<String, String> request) {
+        try {
+            String token = request.get("token");
+            String newPassword = request.get("password");
+
+            if (token == null || newPassword == null) {
+                return ResponseEntity.badRequest().body("Token and password are required");
+            }
+
+            // Validate the token
+            if (!tokenProvider.validateToken(token)) {
+                return ResponseEntity.status(401).body("Invalid or expired token");
+            }
+
+            // Get username from token
+            String username = tokenProvider.getUsernameFromToken(token);
+            
+            // Find the user
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            // Verify it's a candidate
+            if (user.getRole() != Role.CANDIDATE) {
+                return ResponseEntity.badRequest().body("This endpoint is only for candidates");
+            }
+
+            // Check if password is still the default "invited"
+            if (!passwordEncoder.matches("invited", user.getPassword())) {
+                return ResponseEntity.badRequest().body("Password has already been set");
+            }
+
+            // Validate new password
+            if (newPassword.length() < 6) {
+                return ResponseEntity.badRequest().body("Password must be at least 6 characters");
+            }
+
+            // Update password
+            user.setPassword(passwordEncoder.encode(newPassword));
+            userRepository.save(user);
+
+            return ResponseEntity.ok("Password set successfully!");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error setting password: " + e.getMessage());
+        }
     }
 
 }

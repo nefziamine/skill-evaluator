@@ -187,6 +187,8 @@ function RecruiterDashboard() {
         isActive: true,
       })
     }
+    // Fetch questions to ensure they're available for selection
+    fetchQuestions()
     setTestDialogOpen(true)
   }
 
@@ -449,12 +451,26 @@ function RecruiterDashboard() {
     setGeneratingAi(true)
     setError('')
     try {
-      await api.post('/recruiter/generate-ai-test', aiFormData)
+      const response = await api.post('/recruiter/generate-ai-test', aiFormData)
       setSuccess('Test generated successfully with AI!')
       setAiDialogOpen(false)
       fetchData()
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to generate test with AI')
+      console.error('AI Generation Error:', err)
+      const errorMessage = err.response?.data?.error || err.message || 'Failed to generate test with AI'
+      
+      // Provide more specific error messages
+      if (errorMessage.includes('API Key') || errorMessage.includes('configured')) {
+        setError('AI service is not properly configured. Please contact your system administrator to set up the AI API key.')
+      } else if (errorMessage.includes('quota') || errorMessage.includes('rate limit')) {
+        setError('AI service quota exceeded. Please try again later or contact your administrator.')
+      } else if (errorMessage.includes('FALLBACK')) {
+        setSuccess('Test generated successfully using fallback questions! (AI service unavailable)')
+        setAiDialogOpen(false)
+        fetchData()
+      } else {
+        setError(`AI generation failed: ${errorMessage}`)
+      }
     } finally {
       setGeneratingAi(false)
     }
@@ -1385,11 +1401,19 @@ function RecruiterDashboard() {
                     `${selected.length} question(s) selected`
                   }
                 >
-                  {questions.map((q) => (
-                    <MenuItem key={q.id} value={q.id}>
-                      {q.text.substring(0, 60)}... ({q.skill} - {q.difficulty} - {q.type})
+                  {questions.length === 0 ? (
+                    <MenuItem disabled>
+                      <Typography variant="body2" color="text.secondary">
+                        No questions available. Create questions first in the Questions tab.
+                      </Typography>
                     </MenuItem>
-                  ))}
+                  ) : (
+                    questions.map((q) => (
+                      <MenuItem key={q.id} value={q.id}>
+                        {q.text.substring(0, 60)}... ({q.skill} - {q.difficulty} - {q.type})
+                      </MenuItem>
+                    ))
+                  )}
                 </Select>
               </FormControl>
             </Box>

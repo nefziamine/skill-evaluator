@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import {
   AppBar,
   Toolbar,
@@ -8,20 +9,61 @@ import {
   Container,
   alpha,
   useTheme,
+  Menu,
+  MenuItem,
+  IconButton,
+  Avatar,
+  Divider,
 } from '@mui/material'
-import { AutoAwesome, Logout, Dashboard } from '@mui/icons-material'
+import { AutoAwesome, Logout, Dashboard, Person, AccountCircle, Settings, ExitToApp } from '@mui/icons-material'
 
 function Navbar() {
   const navigate = useNavigate()
   const theme = useTheme()
   const token = localStorage.getItem('token')
   const role = localStorage.getItem('userRole')
+  const username = localStorage.getItem('username')
+  
+  const [anchorEl, setAnchorEl] = useState(null)
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false)
+
+  const handleProfileMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget)
+    setProfileMenuOpen(true)
+  }
+
+  const handleProfileMenuClose = () => {
+    setAnchorEl(null)
+    setProfileMenuOpen(false)
+  }
 
   const handleLogout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('userRole')
     localStorage.removeItem('username')
     window.location.href = '/'
+  }
+
+  const handleProfile = () => {
+    handleProfileMenuClose()
+    if (role === 'ADMIN') {
+      navigate('/admin/profile')
+    } else if (role === 'RECRUITER') {
+      navigate('/recruiter/profile')
+    } else {
+      navigate('/candidate/profile')
+    }
+  }
+
+  const handleSettings = () => {
+    handleProfileMenuClose()
+    if (role === 'ADMIN') {
+      navigate('/admin/settings')
+    } else if (role === 'RECRUITER') {
+      navigate('/recruiter/settings')
+    } else {
+      navigate('/candidate/settings')
+    }
   }
 
   return (
@@ -82,21 +124,54 @@ function Navbar() {
                     Recruiter
                   </Button>
                 )}
-                <Button
-                  onClick={handleLogout}
-                  variant="outlined"
-                  color="inherit"
-                  startIcon={<Logout />}
-                  size="small"
+                
+                {/* Profile Icon with Dropdown */}
+                <IconButton
+                  onClick={handleProfileMenuOpen}
                   sx={{
-                    textTransform: 'none',
-                    fontWeight: 600,
-                    borderColor: alpha('#fff', 0.2),
-                    '&:hover': { borderColor: 'white' }
+                    color: 'white',
+                    ml: 1,
+                    '&:hover': { bgcolor: alpha('#fff', 0.1) }
                   }}
                 >
-                  Logout
-                </Button>
+                  <Avatar sx={{ 
+                    width: 32, 
+                    height: 32, 
+                    bgcolor: role === 'ADMIN' ? 'secondary.main' : 'primary.main',
+                    fontSize: '0.875rem'
+                  }}>
+                    {username ? username.charAt(0).toUpperCase() : <Person />}
+                  </Avatar>
+                </IconButton>
+
+                <Menu
+                  anchorEl={anchorEl}
+                  open={profileMenuOpen}
+                  onClose={handleProfileMenuClose}
+                  PaperProps={{
+                    sx: {
+                      bgcolor: '#1e293b',
+                      border: '1px solid',
+                      borderColor: alpha('#fff', 0.1),
+                      mt: 1,
+                      minWidth: 200
+                    }
+                  }}
+                >
+                  <MenuItem onClick={handleProfile} sx={{ color: 'white', '&:hover': { bgcolor: alpha('#fff', 0.1) } }}>
+                    <AccountCircle sx={{ mr: 2, color: '#94a3b8' }} />
+                    Profile
+                  </MenuItem>
+                  <MenuItem onClick={handleSettings} sx={{ color: 'white', '&:hover': { bgcolor: alpha('#fff', 0.1) } }}>
+                    <Settings sx={{ mr: 2, color: '#94a3b8' }} />
+                    Settings
+                  </MenuItem>
+                  <Divider sx={{ borderColor: alpha('#fff', 0.1) }} />
+                  <MenuItem onClick={handleLogout} sx={{ color: 'white', '&:hover': { bgcolor: alpha('#fff', 0.1) } }}>
+                    <ExitToApp sx={{ mr: 2, color: '#94a3b8' }} />
+                    Logout
+                  </MenuItem>
+                </Menu>
               </>
             ) : (
               <>
@@ -107,20 +182,6 @@ function Navbar() {
                   sx={{ textTransform: 'none', fontWeight: 600 }}
                 >
                   Login
-                </Button>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  component={Link}
-                  to="/register"
-                  sx={{
-                    textTransform: 'none',
-                    fontWeight: 600,
-                    borderRadius: 2,
-                    boxShadow: 'none'
-                  }}
-                >
-                  Get Started
                 </Button>
               </>
             )}

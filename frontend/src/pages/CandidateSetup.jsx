@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, Link, useLocation } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Container,
   Box,
@@ -9,40 +9,67 @@ import {
   Paper,
   Alert,
   CircularProgress,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   alpha,
   useTheme,
 } from '@mui/material'
-import { PersonAdd, ArrowBack, Visibility, VisibilityOff } from '@mui/icons-material'
+import { Person, ArrowBack } from '@mui/icons-material'
 import api from '../services/api'
 
-function Register() {
+function CandidateSetup() {
+  const [searchParams] = useSearchParams()
+  const token = searchParams.get('token')
+  const testId = searchParams.get('testId')
+  
   const [formData, setFormData] = useState({
-    username: '',
-    email: '',
     password: '',
     confirmPassword: '',
-    role: 'RECRUITER',
   })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [validatingToken, setValidatingToken] = useState(true)
+  const [candidateInfo, setCandidateInfo] = useState(null)
   const navigate = useNavigate()
-  const location = useLocation()
   const theme = useTheme()
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search)
-    const roleParam = params.get('role')
-    if (roleParam && (roleParam === 'ADMIN' || roleParam === 'RECRUITER')) {
-      setFormData(prev => ({ ...prev, role: roleParam }))
+    const validateToken = async () => {
+      try {
+        // Set the token temporarily for validation
+        const originalToken = localStorage.getItem('token')
+        localStorage.setItem('token', token)
+        
+        const response = await api.get('/auth/me')
+        const user = response.data
+        
+        if (user.role !== 'CANDIDATE') {
+          setError('This setup link is only for candidates.')
+          return
+        }
+        
+        setCandidateInfo(user)
+        setValidatingToken(false)
+        
+        // Restore original token
+        if (originalToken) {
+          localStorage.setItem('token', originalToken)
+        } else {
+          localStorage.removeItem('token')
+        }
+      } catch (err) {
+        setError('Invalid or expired invitation link.')
+        setValidatingToken(false)
+        localStorage.removeItem('token')
+      }
     }
-  }, [location])
+
+    if (token) {
+      validateToken()
+    } else {
+      setError('No invitation token provided.')
+      setValidatingToken(false)
+    }
+  }, [token])
 
   const handleChange = (e) => {
     setFormData({
@@ -50,7 +77,6 @@ function Register() {
       [e.target.name]: e.target.value,
     })
     setError('')
-    setSuccess('')
   }
 
   const handleSubmit = async (e) => {
@@ -71,26 +97,80 @@ function Register() {
     setLoading(true)
 
     try {
-      await api.post('/auth/register', {
-        username: formData.username,
-        email: formData.email,
+      // Set up the candidate password
+      await api.post('/auth/candidate/setup-password', {
+        token: token,
         password: formData.password,
-        role: formData.role,
       })
 
-      setSuccess('Registration successful! Redirecting to login...')
+      setSuccess('Password set successfully! Redirecting to your assessment...')
       setTimeout(() => {
-        navigate('/login')
+        if (testId) {
+          navigate(`/test/${testId}/profile`)
+        } else {
+          navigate('/login?role=CANDIDATE')
+        }
       }, 2000)
     } catch (err) {
       setError(
         err.response?.data?.message ||
         err.response?.data ||
-        'Registration failed. Please try again.'
+        'Failed to set password. Please try again.'
       )
     } finally {
       setLoading(false)
     }
+  }
+
+  if (validatingToken) {
+    return (
+      <Box sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+        bgcolor: '#020617',
+        color: 'white',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <CircularProgress sx={{ mb: 3 }} />
+        <Typography variant="h6">Validating invitation...</Typography>
+      </Box>
+    )
+  }
+
+  if (error && !candidateInfo) {
+    return (
+      <Box sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+        bgcolor: '#020617',
+        color: 'white',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <Alert
+          severity="error"
+          sx={{
+            mb: 3,
+            bgcolor: alpha(theme.palette.error.main, 0.1),
+            color: theme.palette.error.light,
+            border: '1px solid',
+            borderColor: alpha(theme.palette.error.main, 0.2)
+          }}
+        >
+          {error}
+        </Alert>
+        <Button
+          component="a"
+          href="/"
+          sx={{ color: '#94a3b8', textTransform: 'none' }}
+        >
+          Return to Home
+        </Button>
+      </Box>
+    )
   }
 
   return (
@@ -104,8 +184,8 @@ function Register() {
       <Container component="main" maxWidth="xs" sx={{ flexGrow: 1, py: 8, display: 'flex', alignItems: 'center' }}>
         <Box sx={{ width: '100%' }}>
           <Button
-            component={Link}
-            to="/"
+            component="a"
+            href="/"
             startIcon={<ArrowBack />}
             sx={{ mb: 4, color: '#94a3b8', textTransform: 'none' }}
           >
@@ -126,12 +206,12 @@ function Register() {
             }}
           >
             <Box sx={{ textAlign: 'center', mb: 4 }}>
-              <PersonAdd sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+              <Person sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
               <Typography component="h1" variant="h4" fontWeight={700} gutterBottom>
-                Join Platform
+                Set Your Password
               </Typography>
               <Typography variant="body2" sx={{ color: '#94a3b8' }}>
-                Create your professional account
+                Welcome {candidateInfo?.email || 'Candidate'}! Please set your password to continue.
               </Typography>
             </Box>
 
@@ -170,61 +250,13 @@ function Register() {
                 margin="normal"
                 required
                 fullWidth
-                id="username"
-                label="Username"
-                name="username"
-                autoComplete="username"
-                autoFocus
-                value={formData.username}
-                onChange={handleChange}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    color: 'white',
-                    '& fieldset': { borderColor: alpha('#fff', 0.2) },
-                    '&:hover fieldset': { borderColor: alpha('#fff', 0.3) },
-                  },
-                  '& .MuiInputLabel-root': { color: '#94a3b8' }
-                }}
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    color: 'white',
-                    '& fieldset': { borderColor: alpha('#fff', 0.2) },
-                    '&:hover fieldset': { borderColor: alpha('#fff', 0.3) },
-                  },
-                  '& .MuiInputLabel-root': { color: '#94a3b8' }
-                }}
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
                 name="password"
                 label="Password"
-                type={showPassword ? 'text' : 'password'}
+                type="password"
                 id="password"
+                autoComplete="new-password"
                 value={formData.password}
                 onChange={handleChange}
-                InputProps={{
-                  endAdornment: (
-                    <Button
-                      onClick={() => setShowPassword(!showPassword)}
-                      sx={{ color: '#94a3b8', minWidth: 'auto', p: 1 }}
-                    >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </Button>
-                  ),
-                }}
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     color: 'white',
@@ -241,20 +273,11 @@ function Register() {
                 fullWidth
                 name="confirmPassword"
                 label="Confirm Password"
-                type={showConfirmPassword ? 'text' : 'password'}
+                type="password"
                 id="confirmPassword"
+                autoComplete="new-password"
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                InputProps={{
-                  endAdornment: (
-                    <Button
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      sx={{ color: '#94a3b8', minWidth: 'auto', p: 1 }}
-                    >
-                      {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                    </Button>
-                  ),
-                }}
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     color: 'white',
@@ -264,9 +287,6 @@ function Register() {
                   '& .MuiInputLabel-root': { color: '#94a3b8' }
                 }}
               />
-
-              {/* Register As section hidden as per request */}
-
               <Button
                 type="submit"
                 fullWidth
@@ -284,7 +304,7 @@ function Register() {
                 }}
                 disabled={loading}
               >
-                {loading ? <CircularProgress size={24} color="inherit" /> : 'Create Account'}
+                {loading ? <CircularProgress size={24} /> : 'Set Password'}
               </Button>
             </Box>
           </Paper>
@@ -294,5 +314,4 @@ function Register() {
   )
 }
 
-export default Register
-
+export default CandidateSetup
