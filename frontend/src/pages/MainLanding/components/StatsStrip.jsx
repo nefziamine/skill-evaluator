@@ -9,7 +9,7 @@ const stats = [
 
 export default function StatsStrip() {
     return (
-        <Box sx={{ py: 6, bgcolor: '#020617', borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <Box sx={{ py: 6, bgcolor: '#020617'/*, borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)'*/ }}>
             <Container maxWidth="lg">
                 <Grid container spacing={4} justifyContent="center">
                     {stats.map((stat, i) => (

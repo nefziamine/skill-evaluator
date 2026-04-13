@@ -11,7 +11,7 @@ const features = [
 
 export default function RecruiterFeatures() {
     return (
-        <Box id="for-recruiters" sx={{ py: 12, bgcolor: '#1e293b' }}>
+        <Box id="for-recruiters" sx={{ py: 12, bgcolor: '#020617' }}>
             <Container maxWidth="lg">
                 <Grid container spacing={8} alignItems="center">
                     <Grid item xs={12} md={5}>

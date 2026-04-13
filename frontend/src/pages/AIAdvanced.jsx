@@ -196,7 +196,7 @@ export default function AIAdvanced() {
                         position: 'relative',
                         overflow: 'hidden'
                     }}>
-                        <Box sx={{ textAlign: 'center', mb: 10 }}>
+                        <Box sx={{ textAlign: 'center', mb: 10, paddingBottom: 7 }}>
                             <Typography variant="h3" fontWeight={900} gutterBottom>Our Thinking Flow</Typography>
                             <Typography variant="h6" color="text.secondary">How our AI reconstructs the candidate's journey</Typography>
                         </Box>
@@ -207,8 +207,9 @@ export default function AIAdvanced() {
                                     <Box sx={{ position: 'relative' }}>
                                         <Typography variant="h1" sx={{
                                             position: 'absolute',
-                                            top: -40,
-                                            left: -10,
+                                            top: -100,
+                                            left: '10',
+                                            //transform: 'translateX(-50%)',
                                             fontSize: '6rem',
                                             fontWeight: 900,
                                             color: alpha('#fff', 0.03),
@@ -233,7 +234,7 @@ export default function AIAdvanced() {
                         <Box sx={{
                             display: { xs: 'none', md: 'block' },
                             position: 'absolute',
-                            top: '65%',
+                            top: '90%',
                             left: '10%',
                             right: '10%',
                             height: '2px',

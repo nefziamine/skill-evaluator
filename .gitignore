@@ -38,3 +38,22 @@ docker-compose.override.yml
 node_modules/
 skill-evaluator.zip
 build_log.txt
+
+
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# On branch main
+# Your branch is up to date with 'origin/main'.
+#
+# Changes to be committed:
+#	modified:   frontend/src/pages/AIAdvanced.jsx
+#	modified:   frontend/src/pages/MainLanding/components/FAQ.jsx
+#	modified:   frontend/src/pages/MainLanding/components/FooterLanding.jsx
+#	modified:   frontend/src/pages/MainLanding/components/HeroSection.jsx
+#	modified:   frontend/src/pages/MainLanding/components/RecruiterFeatures.jsx
+#	modified:   frontend/src/pages/MainLanding/components/StatsStrip.jsx
+#	modified:   frontend/src/pages/MainLanding/components/TopNav.jsx
+#	modified:   frontend/src/pages/MainLanding/components/VerificationOptions.jsx
+#

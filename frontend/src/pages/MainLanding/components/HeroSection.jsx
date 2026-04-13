@@ -12,7 +12,7 @@ export default function HeroSection() {
             pb: { xs: 12, md: 16 },
             position: 'relative',
             overflow: 'hidden',
-            background: 'radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%)'
+            background: '#020617'
         }}>
             {/* Abstract Background Blotches */}
             <Box sx={{ position: 'absolute', top: -100, left: '10%', width: 500, height: 500, bgcolor: 'primary.main', opacity: 0.05, filter: 'blur(100px)', borderRadius: '50%' }} />

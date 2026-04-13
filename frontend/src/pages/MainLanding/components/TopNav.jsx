@@ -85,6 +85,15 @@ export default function TopNav() {
                                 anchorEl={anchorEl}
                                 open={open}
                                 onClose={handleClose}
+                                disableScrollLock={true}
+                                anchorOrigin={{
+                                    vertical: 'bottom',
+                                    horizontal: 'left',
+                                }}
+                                transformOrigin={{
+                                    vertical: 'top',
+                                    horizontal: 'left',
+                                }}
                                 PaperProps={{
                                     sx: {
                                         bgcolor: '#1e293b',

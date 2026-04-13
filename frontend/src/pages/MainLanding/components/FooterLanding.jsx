@@ -3,7 +3,7 @@ import { LinkedIn, Twitter, GitHub, VerifiedUser } from '@mui/icons-material';
 
 export default function FooterLanding() {
     return (
-        <Box sx={{ bgcolor: 'background.paper', py: 8, borderTop: 1, borderColor: 'divider' }}>
+        <Box sx={{ bgcolor: '#020617', py: 8, borderTop: 1, borderColor: 'divider' }}>
             <Container maxWidth="lg">
                 <Grid container spacing={8}>
                     <Grid item xs={12} md={4}>
