@@ -1,5 +1,6 @@
 import { Box, Container, Typography, Grid, Paper, Stack, Button, useTheme, alpha, Divider } from '@mui/material';
 import { AutoAwesome, Psychology, Speed, Shield, Code, Memory, Insights, RocketLaunch } from '@mui/icons-material';
+import { Link } from 'react-router-dom';
 import TopNav from './MainLanding/components/TopNav';
 import Footer from '../components/Footer';
 import ParticlesBackground from './MainLanding/components/ParticlesBackground';
@@ -126,7 +127,12 @@ export default function AIAdvanced() {
                         </Typography>
 
                         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} justifyContent="center">
-                            <Button variant="contained" size="large" sx={{
+                            <Button 
+                                component={Link} 
+                                to="/pricing"
+                                variant="contained" 
+                                size="large" 
+                                sx={{
                                 px: 6,
                                 py: 2,
                                 borderRadius: 4,
@@ -258,7 +264,12 @@ export default function AIAdvanced() {
                             <Typography variant="h6" sx={{ mb: 5, opacity: 0.9 }}>
                                 Join 500+ forward-thinking companies using AI Advanced.
                             </Typography>
-                            <Button variant="contained" size="large" sx={{
+                            <Button 
+                                component={Link}
+                                to="/pricing"
+                                variant="contained" 
+                                size="large" 
+                                sx={{
                                 bgcolor: 'white',
                                 color: 'primary.main',
                                 px: 8,

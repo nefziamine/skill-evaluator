@@ -53,13 +53,13 @@ export default function HeroSection() {
                     {!isRecruiter && (
                         <Button
                             component={Link}
-                            to="/tests"
+                            to="/pricing"
                             variant="contained"
                             size="large"
                             endIcon={<ArrowForward />}
                             sx={{ px: 4, py: 1.5, fontSize: '1.1rem', borderRadius: 50 }}
                         >
-                            Start Free Skill Test
+                            Get Started
                         </Button>
                     )}
                     <Button

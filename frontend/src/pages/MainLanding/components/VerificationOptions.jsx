@@ -1,4 +1,4 @@
-import { Box, Container, Typography, Grid, Paper, Button, Chip, List, ListItem, ListItemIcon, ListItemText, Divider } from '@mui/material';
+import { Box, Container, Typography, Grid, Paper, Button, Chip, List, ListItem, ListItemIcon, ListItemText, Divider, Stack } from '@mui/material';
 import { Check, AutoAwesome, Bolt } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
 
@@ -52,7 +52,7 @@ export default function VerificationOptions() {
                                     <Chip label="Verified Java" size="small" variant="outlined" />
                                     <Chip label="Verified Python" size="small" variant="outlined" />
                                 </Stack>
-                                <Button component={Link} to="/tests" variant="outlined" fullWidth size="large" sx={{ py: 1.5, borderRadius: 3 }}>Start Standard Test</Button>
+                                <Button component={Link} to="/pricing" variant="outlined" fullWidth size="large" sx={{ py: 1.5, borderRadius: 3 }}>Start Standard Test</Button>
                             </Box>
                         </Paper>
                     </Grid>
@@ -103,7 +103,7 @@ export default function VerificationOptions() {
                                     <Chip icon={<Bolt />} label="AI Verified Java" size="small" color="secondary" />
                                     <Chip icon={<Bolt />} label="AI Verified SQL" size="small" color="secondary" />
                                 </Stack>
-                                <Button component={Link} to="/ai-tests" variant="contained" color="secondary" fullWidth size="large" sx={{ py: 1.5, borderRadius: 3, boxShadow: '0 8px 20px -5px rgba(236,72,153,0.5)' }}>Try AI Advanced</Button>
+                                <Button component={Link} to="/pricing" variant="contained" color="secondary" fullWidth size="large" sx={{ py: 1.5, borderRadius: 3, boxShadow: '0 8px 20px -5px rgba(236,72,153,0.5)' }}>Try AI Advanced</Button>
                             </Box>
                         </Paper>
                     </Grid>
@@ -113,4 +113,3 @@ export default function VerificationOptions() {
     );
 }
 
-import { Stack } from '@mui/material'; // Forgot to import Stack

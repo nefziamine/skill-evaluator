@@ -25,6 +25,7 @@ import Contact from './pages/Contact'
 import Terms from './pages/Terms'
 import Privacy from './pages/Privacy'
 import Pricing from './pages/Pricing'
+import RecruiterBilling from './pages/RecruiterBilling'
 
 const darkTheme = createTheme({
   palette: {
@@ -117,6 +118,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['RECRUITER', 'ADMIN']}>
                 <RecruiterDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/recruiter/billing"
+            element={
+              <ProtectedRoute>
+                <RecruiterBilling />
               </ProtectedRoute>
             }
           />

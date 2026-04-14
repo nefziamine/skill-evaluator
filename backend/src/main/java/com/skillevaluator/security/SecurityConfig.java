@@ -65,6 +65,7 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
+                        .requestMatchers("/api/webhooks/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
 
                         // Admin only endpoints

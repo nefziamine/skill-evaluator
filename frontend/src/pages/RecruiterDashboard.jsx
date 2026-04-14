@@ -1097,13 +1097,23 @@ function RecruiterDashboard() {
                     value={profileForm.confirmPassword}
                     onChange={(e) => setProfileForm({ ...profileForm, confirmPassword: e.target.value })}
                   />
-                  <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+                  <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <Button
                       type="submit"
                       variant="contained"
                       disabled={savingProfile}
+                      fullWidth
+                      sx={{ py: 1.5, borderRadius: 2 }}
                     >
-                      {savingProfile ? 'Saving...' : 'Save Changes'}
+                      {savingProfile ? 'Saving...' : 'Save Profile Changes'}
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      onClick={() => navigate('/recruiter/billing')}
+                      fullWidth
+                      sx={{ py: 1.5, borderRadius: 2 }}
+                    >
+                      Manage Billing & Payments
                     </Button>
                   </Box>
                 </Box>

@@ -59,13 +59,19 @@ function Login() {
       localStorage.setItem('userRole', role)
       localStorage.setItem('username', response.data.username)
 
-      // Redirect based on role
+      // Support for Post-Login Redirect
+      const redirectTo = queryParams.get('redirect')
+      if (redirectTo) {
+        navigate(`/${redirectTo}`)
+        return
+      }
+
+      // Default role-based redirection
       if (role === 'ADMIN') {
         navigate('/admin/dashboard')
       } else if (role === 'RECRUITER') {
         navigate('/recruiter/dashboard')
       } else {
-        // Candidates should not login here
         localStorage.clear()
         setError('Access denied. Please use the link provided in your invitation.')
       }
@@ -268,50 +274,51 @@ function Login() {
                 </Box>
               )}
             </Box>
-        </Paper>
-      </Box>
-    </Container>
+          </Paper>
+        </Box>
+      </Container>
 
-    {/* Forgot Password Dialog */}
-    <Dialog open={forgotPasswordOpen} onClose={() => setForgotPasswordOpen(false)} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ bgcolor: '#1e293b', color: 'white' }}>
-        Admin Password Recovery
-      </DialogTitle>
-      <DialogContent sx={{ bgcolor: '#1e293b', color: 'white', p: 3 }}>
-        <Typography variant="body2" sx={{ mb: 2, color: '#94a3b8' }}>
-          Enter your admin email address to receive password reset instructions.
-        </Typography>
-        <TextField
-          fullWidth
-          label="Admin Email"
-          type="email"
-          value={resetEmail}
-          onChange={(e) => setResetEmail(e.target.value)}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              color: 'white',
-              '& fieldset': { borderColor: alpha('#fff', 0.2) },
-              '&:hover fieldset': { borderColor: alpha('#fff', 0.3) },
-            },
-            '& .MuiInputLabel-root': { color: '#94a3b8' }
-          }}
-        />
-      </DialogContent>
-      <DialogActions sx={{ bgcolor: '#1e293b', p: 3 }}>
-        <Button onClick={() => setForgotPasswordOpen(false)} sx={{ color: '#94a3b8' }}>
-          Cancel
-        </Button>
-        <Button
-          onClick={handleForgotPassword}
-          variant="contained"
-          color="secondary"
-          disabled={resetLoading}
-        >
-          {resetLoading ? <CircularProgress size={20} /> : 'Send Reset Instructions'}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  </Box>
-)
+      {/* Forgot Password Dialog */}
+      <Dialog open={forgotPasswordOpen} onClose={() => setForgotPasswordOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ bgcolor: '#1e293b', color: 'white' }}>
+          Admin Password Recovery
+        </DialogTitle>
+        <DialogContent sx={{ bgcolor: '#1e293b', color: 'white', p: 3 }}>
+          <Typography variant="body2" sx={{ mb: 2, color: '#94a3b8' }}>
+            Enter your admin email address to receive password reset instructions.
+          </Typography>
+          <TextField
+            fullWidth
+            label="Admin Email"
+            type="email"
+            value={resetEmail}
+            onChange={(e) => setResetEmail(e.target.value)}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                color: 'white',
+                '& fieldset': { borderColor: alpha('#fff', 0.1) },
+                '&:hover fieldset': { borderColor: alpha('#fff', 0.2) },
+              },
+              '& .MuiInputLabel-root': { color: '#94a3b8' }
+            }}
+          />
+        </DialogContent>
+        <DialogActions sx={{ bgcolor: '#1e293b', p: 3 }}>
+          <Button onClick={() => setForgotPasswordOpen(false)} sx={{ color: '#94a3b8' }}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleForgotPassword}
+            variant="contained"
+            color="secondary"
+            disabled={resetLoading}
+          >
+            {resetLoading ? <CircularProgress size={20} /> : 'Send Reset Instructions'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
+  )
+}
 
 export default Login;
