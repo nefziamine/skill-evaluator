@@ -12,31 +12,12 @@ function InviteHandler() {
     useEffect(() => {
         const handleInviteToken = async () => {
             if (token) {
-                const existingToken = localStorage.getItem('token')
-                const existingRole = localStorage.getItem('userRole')
+                // Clear any existing session (log out) to prevent role conflicts
+                // If a recruiter clicks an invite link, we want them to see the candidate flow.
+                localStorage.removeItem('token')
+                localStorage.removeItem('userRole')
                 
-                // Check if user is already authenticated as recruiter or admin
-                if (existingToken && existingRole && (existingRole === 'RECRUITER' || existingRole === 'ADMIN')) {
-                    try {
-                        // Verify existing token is still valid
-                        await api.get('/auth/me')
-                        
-                        // If token is valid and user is recruiter/admin, don't overwrite
-                        // Instead, open the test in a new context or show a message
-                        if (testId) {
-                            // Navigate to test preview instead of taking over session
-                            navigate(`/recruiter/tests/${testId}/preview`)
-                        } else {
-                            navigate('/recruiter/dashboard')
-                        }
-                        return
-                    } catch (error) {
-                        // Existing token is invalid, proceed with invite token
-                        console.log('Existing token invalid, proceeding with invite token')
-                    }
-                }
-                
-                // For new candidates or invalid existing tokens, proceed with invite token
+                // For new candidates or cleared sessions, proceed with invite token
                 localStorage.setItem('token', token)
                 localStorage.setItem('userRole', 'CANDIDATE')
 

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 export default function VerificationOptions() {
     return (
-        <Box id="ai-advanced" sx={{ py: 12, bgcolor: '#020617' }}>
+        <Box id="ai-advanced" sx={{ py: 12, bgcolor: 'transparent' }}>
             <Container maxWidth="lg">
                 <Typography variant="h2" align="center" fontWeight={800} gutterBottom>Two ways to get verified</Typography>
                 <Typography variant="h6" align="center" color="text.secondary" sx={{ mb: 8, maxWidth: 600, mx: 'auto' }}>

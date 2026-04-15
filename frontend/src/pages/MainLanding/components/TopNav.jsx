@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AppBar, Toolbar, Typography, Button, Box, Container, useTheme, useScrollTrigger, Menu, MenuItem } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Box, Container, useTheme, useScrollTrigger, Menu, MenuItem, alpha } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { VerifiedUser, KeyboardArrowDown } from '@mui/icons-material';
 
@@ -59,49 +59,84 @@ export default function TopNav() {
                         </Box>
 
                         {/* Desktop Links */}
-                        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 4, alignItems: 'center', mr: 4 }}>
+                        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1, alignItems: 'center', mr: 2 }}>
                             <Button
                                 component={Link}
                                 to="/tests"
-                                sx={{ color: 'text.secondary', fontWeight: 600, textTransform: 'none', '&:hover': { color: 'primary.main' } }}
+                                sx={{ 
+                                    color: 'text.secondary', 
+                                    fontWeight: 700, 
+                                    px: 2,
+                                    textTransform: 'none', 
+                                    letterSpacing: '-0.01em',
+                                    fontSize: '0.95rem',
+                                    '&:hover': { color: 'primary.main', bgcolor: alpha(theme.palette.primary.main, 0.05) } 
+                                }}
                             >
                                 Tests
                             </Button>
                             <Button
                                 component={Link}
                                 to="/ai-advanced"
-                                sx={{ color: 'text.secondary', fontWeight: 600, textTransform: 'none', '&:hover': { color: 'primary.main' } }}
+                                sx={{ 
+                                    color: 'text.secondary', 
+                                    fontWeight: 700, 
+                                    px: 2,
+                                    textTransform: 'none', 
+                                    letterSpacing: '-0.01em',
+                                    fontSize: '0.95rem',
+                                    '&:hover': { color: 'primary.main', bgcolor: alpha(theme.palette.primary.main, 0.05) } 
+                                }}
                             >
                                 AI Advanced
                             </Button>
                             <Button
+                                component={Link}
+                                to="/jobs"
+                                sx={{ 
+                                    color: 'text.secondary', 
+                                    fontWeight: 700, 
+                                    px: 2,
+                                    textTransform: 'none', 
+                                    letterSpacing: '-0.01em',
+                                    fontSize: '0.95rem',
+                                    '&:hover': { color: 'primary.main', bgcolor: alpha(theme.palette.primary.main, 0.05) } 
+                                }}
+                            >
+                                Jobs board
+                            </Button>
+                            <Button
                                 onClick={handleRecruiterClick}
                                 endIcon={<KeyboardArrowDown />}
-                                sx={{ color: 'text.secondary', fontWeight: 600, textTransform: 'none', '&:hover': { color: 'primary.main' } }}
+                                sx={{ 
+                                    color: 'text.secondary', 
+                                    fontWeight: 700, 
+                                    px: 2,
+                                    textTransform: 'none', 
+                                    letterSpacing: '-0.01em',
+                                    fontSize: '0.95rem',
+                                    '&:hover': { color: 'primary.main', bgcolor: alpha(theme.palette.primary.main, 0.05) } 
+                                }}
                             >
-                                For Recruiters
+                                Hire
                             </Button>
                             <Menu
                                 anchorEl={anchorEl}
                                 open={open}
                                 onClose={handleClose}
                                 disableScrollLock={true}
-                                anchorOrigin={{
-                                    vertical: 'bottom',
-                                    horizontal: 'left',
-                                }}
-                                transformOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'left',
-                                }}
+                                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                                transformOrigin={{ vertical: 'top', horizontal: 'left' }}
                                 PaperProps={{
                                     sx: {
-                                        bgcolor: '#1e293b',
+                                        bgcolor: '#0f172a',
                                         color: 'white',
                                         border: '1px solid',
                                         borderColor: 'rgba(255,255,255,0.1)',
-                                        mt: 1,
-                                        '& .MuiMenuItem-root': { fontWeight: 600, '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' } }
+                                        borderRadius: 3,
+                                        mt: 1.5,
+                                        boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+                                        '& .MuiMenuItem-root': { px: 3, py: 1.5, fontWeight: 600, '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' } }
                                     }
                                 }}
                             >
@@ -112,7 +147,15 @@ export default function TopNav() {
                             <Button
                                 component={Link}
                                 to="/how-it-works"
-                                sx={{ color: 'text.secondary', fontWeight: 600, textTransform: 'none', '&:hover': { color: 'primary.main' } }}
+                                sx={{ 
+                                    color: 'text.secondary', 
+                                    fontWeight: 700, 
+                                    px: 2,
+                                    textTransform: 'none', 
+                                    letterSpacing: '-0.01em',
+                                    fontSize: '0.95rem',
+                                    '&:hover': { color: 'primary.main', bgcolor: alpha(theme.palette.primary.main, 0.05) } 
+                                }}
                             >
                                 How it works
                             </Button>

@@ -23,7 +23,7 @@ const testimonials = [
 
 export default function Testimonials() {
     return (
-        <Box sx={{ py: 12, bgcolor: '#020617' }}>
+        <Box sx={{ py: 12, bgcolor: 'transparent' }}>
             <Container maxWidth="lg">
                 <Typography variant="h4" align="center" fontWeight={800} sx={{ mb: 8 }}>Trusted by the community</Typography>
                 <Grid container spacing={4}>

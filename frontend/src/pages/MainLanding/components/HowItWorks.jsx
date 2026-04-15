@@ -23,7 +23,7 @@ export default function HowItWorks() {
     };
 
     return (
-        <Box id="how-it-works" sx={{ py: 12, bgcolor: '#020617' }}>
+        <Box id="how-it-works" sx={{ py: 12, bgcolor: 'transparent' }}>
             <Container maxWidth="lg">
                 <Box textAlign="center" mb={8}>
                     <Typography variant="h2" fontWeight={800} gutterBottom>How it works</Typography>

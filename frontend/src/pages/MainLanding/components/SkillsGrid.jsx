@@ -13,7 +13,7 @@ const skills = [
 
 export default function SkillsGrid() {
     return (
-        <Box sx={{ py: 12, bgcolor: '#020617' }}>
+        <Box sx={{ py: 12, bgcolor: 'transparent' }}>
             <Container maxWidth="lg">
                 <Typography variant="h4" fontWeight={800} sx={{ mb: 6 }} align="center">
                     Popular Skill Tracks

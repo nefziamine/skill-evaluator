@@ -11,8 +11,9 @@ import {
   CircularProgress,
   alpha,
   useTheme,
+  Grid,
 } from '@mui/material'
-import { Person, ArrowBack } from '@mui/icons-material'
+import { Person, ArrowBack, Link as LinkIcon, Phone } from '@mui/icons-material'
 import api from '../services/api'
 
 function CandidateSetup() {
@@ -21,6 +22,12 @@ function CandidateSetup() {
   const testId = searchParams.get('testId')
   
   const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    phone: '',
+    linkedinUrl: '',
+    githubUrl: '',
+    portfolioUrl: '',
     password: '',
     confirmPassword: '',
   })
@@ -84,6 +91,11 @@ function CandidateSetup() {
     setError('')
     setSuccess('')
 
+    if (!formData.firstName.trim() || !formData.lastName.trim()) {
+      setError('First and Last names are required')
+      return
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match')
       return
@@ -97,13 +109,35 @@ function CandidateSetup() {
     setLoading(true)
 
     try {
-      // Set up the candidate password
+      // 1. Set up the candidate password
       await api.post('/auth/candidate/setup-password', {
         token: token,
         password: formData.password,
       })
 
-      setSuccess('Password set successfully! Redirecting to your assessment...')
+      // 2. Set token temporarily to update candidate profile details
+      const originalToken = localStorage.getItem('token')
+      localStorage.setItem('token', token)
+
+      await api.put('/candidate/profile', {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+        linkedinUrl: formData.linkedinUrl,
+        portfolioUrl: formData.portfolioUrl,
+        githubUrl: formData.githubUrl,
+      })
+
+      // Restore token, but if they are moving directly to test we keep the token
+      if (testId) {
+         // Keep the invite token active for taking the test
+      } else if (originalToken) {
+        localStorage.setItem('token', originalToken)
+      } else {
+        localStorage.removeItem('token')
+      }
+
+      setSuccess('Profile configured successfully! Redirecting to your assessment...')
       setTimeout(() => {
         if (testId) {
           navigate(`/test/${testId}/profile`)
@@ -115,7 +149,7 @@ function CandidateSetup() {
       setError(
         err.response?.data?.message ||
         err.response?.data ||
-        'Failed to set password. Please try again.'
+        'Failed to set up profile. Please try again.'
       )
     } finally {
       setLoading(false)
@@ -124,15 +158,7 @@ function CandidateSetup() {
 
   if (validatingToken) {
     return (
-      <Box sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: '100vh',
-        bgcolor: '#020617',
-        color: 'white',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: '#020617', color: 'white', alignItems: 'center', justifyContent: 'center' }}>
         <CircularProgress sx={{ mb: 3 }} />
         <Typography variant="h6">Validating invitation...</Typography>
       </Box>
@@ -141,170 +167,99 @@ function CandidateSetup() {
 
   if (error && !candidateInfo) {
     return (
-      <Box sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: '100vh',
-        bgcolor: '#020617',
-        color: 'white',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <Alert
-          severity="error"
-          sx={{
-            mb: 3,
-            bgcolor: alpha(theme.palette.error.main, 0.1),
-            color: theme.palette.error.light,
-            border: '1px solid',
-            borderColor: alpha(theme.palette.error.main, 0.2)
-          }}
-        >
+      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: '#020617', color: 'white', alignItems: 'center', justifyContent: 'center' }}>
+        <Alert severity="error" sx={{ mb: 3, bgcolor: alpha(theme.palette.error.main, 0.1), color: theme.palette.error.light, border: '1px solid', borderColor: alpha(theme.palette.error.main, 0.2) }}>
           {error}
         </Alert>
-        <Button
-          component="a"
-          href="/"
-          sx={{ color: '#94a3b8', textTransform: 'none' }}
-        >
+        <Button component="a" href="/" sx={{ color: '#94a3b8', textTransform: 'none' }}>
           Return to Home
         </Button>
       </Box>
     )
   }
 
+  const inputStyles = {
+    '& .MuiOutlinedInput-root': {
+      color: 'white',
+      '& fieldset': { borderColor: alpha('#fff', 0.2) },
+      '&:hover fieldset': { borderColor: alpha('#fff', 0.3) },
+    },
+    '& .MuiInputLabel-root': { color: '#94a3b8' }
+  }
+
   return (
-    <Box sx={{
-      display: 'flex',
-      flexDirection: 'column',
-      minHeight: '100vh',
-      bgcolor: '#020617',
-      color: 'white'
-    }}>
-      <Container component="main" maxWidth="xs" sx={{ flexGrow: 1, py: 8, display: 'flex', alignItems: 'center' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: '#020617', color: 'white' }}>
+      <Container component="main" maxWidth="md" sx={{ flexGrow: 1, py: 6, display: 'flex', alignItems: 'center' }}>
         <Box sx={{ width: '100%' }}>
-          <Button
-            component="a"
-            href="/"
-            startIcon={<ArrowBack />}
-            sx={{ mb: 4, color: '#94a3b8', textTransform: 'none' }}
-          >
+          <Button component="a" href="/" startIcon={<ArrowBack />} sx={{ mb: 4, color: '#94a3b8', textTransform: 'none' }}>
             Back to Home
           </Button>
 
-          <Paper
-            elevation={0}
-            sx={{
-              p: 5,
-              width: '100%',
-              bgcolor: alpha('#1e293b', 0.5),
-              backdropFilter: 'blur(20px)',
-              border: '1px solid',
-              borderColor: alpha('#fff', 0.1),
-              borderRadius: 6,
-              color: 'white'
-            }}
-          >
+          <Paper elevation={0} sx={{ p: { xs: 4, md: 6 }, width: '100%', bgcolor: alpha('#1e293b', 0.5), backdropFilter: 'blur(20px)', border: '1px solid', borderColor: alpha('#fff', 0.1), borderRadius: 6, color: 'white' }}>
             <Box sx={{ textAlign: 'center', mb: 4 }}>
               <Person sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
               <Typography component="h1" variant="h4" fontWeight={700} gutterBottom>
-                Set Your Password
+                Complete Your Profile
               </Typography>
-              <Typography variant="body2" sx={{ color: '#94a3b8' }}>
-                Welcome {candidateInfo?.email || 'Candidate'}! Please set your password to continue.
+              <Typography variant="body1" sx={{ color: '#94a3b8', maxWidth: '600px', mx: 'auto' }}>
+                Welcome <strong>{candidateInfo?.email}</strong>! Please fill out your personal details and set a secure password to proceed to your assessment.
               </Typography>
             </Box>
 
             {error && (
-              <Alert
-                severity="error"
-                sx={{
-                  mb: 3,
-                  bgcolor: alpha(theme.palette.error.main, 0.1),
-                  color: theme.palette.error.light,
-                  border: '1px solid',
-                  borderColor: alpha(theme.palette.error.main, 0.2)
-                }}
-              >
+              <Alert severity="error" sx={{ mb: 3, bgcolor: alpha(theme.palette.error.main, 0.1), color: theme.palette.error.light, border: '1px solid', borderColor: alpha(theme.palette.error.main, 0.2) }}>
                 {error}
               </Alert>
             )}
 
             {success && (
-              <Alert
-                severity="success"
-                sx={{
-                  mb: 3,
-                  bgcolor: alpha(theme.palette.success.main, 0.1),
-                  color: theme.palette.success.light,
-                  border: '1px solid',
-                  borderColor: alpha(theme.palette.success.main, 0.2)
-                }}
-              >
+              <Alert severity="success" sx={{ mb: 3, bgcolor: alpha(theme.palette.success.main, 0.1), color: theme.palette.success.light, border: '1px solid', borderColor: alpha(theme.palette.success.main, 0.2) }}>
                 {success}
               </Alert>
             )}
 
             <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-                autoComplete="new-password"
-                value={formData.password}
-                onChange={handleChange}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    color: 'white',
-                    '& fieldset': { borderColor: alpha('#fff', 0.2) },
-                    '&:hover fieldset': { borderColor: alpha('#fff', 0.3) },
-                  },
-                  '& .MuiInputLabel-root': { color: '#94a3b8' }
-                }}
-                helperText={<Typography variant="caption" sx={{ color: '#64748b' }}>Minimum 6 characters</Typography>}
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                name="confirmPassword"
-                label="Confirm Password"
-                type="password"
-                id="confirmPassword"
-                autoComplete="new-password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    color: 'white',
-                    '& fieldset': { borderColor: alpha('#fff', 0.2) },
-                    '&:hover fieldset': { borderColor: alpha('#fff', 0.3) },
-                  },
-                  '& .MuiInputLabel-root': { color: '#94a3b8' }
-                }}
-              />
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                size="large"
-                sx={{
-                  mt: 4,
-                  mb: 3,
-                  py: 1.5,
-                  borderRadius: 3,
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  fontSize: '1rem',
-                  boxShadow: '0 10px 20px -10px rgba(59, 130, 246, 0.5)'
-                }}
-                disabled={loading}
-              >
-                {loading ? <CircularProgress size={24} /> : 'Set Password'}
+              <Typography variant="h6" sx={{ mb: 2, color: 'primary.light', borderBottom: '1px solid', borderColor: alpha('#fff', 0.1), pb: 1 }}>
+                Personal Details
+              </Typography>
+              
+              <Grid container spacing={3}>
+                <Grid item xs={12} sm={6}>
+                  <TextField required fullWidth name="firstName" label="First Name" id="firstName" value={formData.firstName} onChange={handleChange} sx={inputStyles} />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField required fullWidth name="lastName" label="Last Name" id="lastName" value={formData.lastName} onChange={handleChange} sx={inputStyles} />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField fullWidth name="phone" label="Phone Number" id="phone" value={formData.phone} onChange={handleChange} sx={inputStyles} />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField fullWidth name="linkedinUrl" label="LinkedIn Profile URL" id="linkedinUrl" value={formData.linkedinUrl} onChange={handleChange} sx={inputStyles} />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField fullWidth name="githubUrl" label="GitHub Profile URL" id="githubUrl" value={formData.githubUrl} onChange={handleChange} sx={inputStyles} />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField fullWidth name="portfolioUrl" label="Personal Portfolio URL" id="portfolioUrl" value={formData.portfolioUrl} onChange={handleChange} sx={inputStyles} />
+                </Grid>
+              </Grid>
+
+              <Typography variant="h6" sx={{ mb: 2, mt: 5, color: 'primary.light', borderBottom: '1px solid', borderColor: alpha('#fff', 0.1), pb: 1 }}>
+                Security Settings
+              </Typography>
+              
+              <Grid container spacing={3}>
+                <Grid item xs={12} sm={6}>
+                  <TextField required fullWidth name="password" label="New Password" type="password" id="password" value={formData.password} onChange={handleChange} sx={inputStyles} helperText={<Typography variant="caption" sx={{ color: '#64748b' }}>Minimum 6 characters</Typography>} />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField required fullWidth name="confirmPassword" label="Confirm Password" type="password" id="confirmPassword" value={formData.confirmPassword} onChange={handleChange} sx={inputStyles} />
+                </Grid>
+              </Grid>
+
+              <Button type="submit" fullWidth variant="contained" size="large" disabled={loading}
+                sx={{ mt: 5, mb: 2, py: 1.5, borderRadius: 3, fontWeight: 600, textTransform: 'none', fontSize: '1.1rem', boxShadow: '0 10px 20px -10px rgba(59, 130, 246, 0.5)' }}>
+                {loading ? <CircularProgress size={24} /> : 'Save Profile & Start Assessment'}
               </Button>
             </Box>
           </Paper>

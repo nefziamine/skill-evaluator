@@ -109,6 +109,12 @@ function Pricing() {
         return
       }
 
+      // If enterprise, direct to contact sales
+      if (tierId === 'ENTERPRISE') {
+        window.location.href = '/contact'
+        return
+      }
+
       // Redirect to the new Payment Methods management page
       window.location.href = '/recruiter/billing'
     } catch (error) {

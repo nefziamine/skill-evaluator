@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, memo } from "react";
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
+import { Box } from "@mui/material";
 
-export default function ParticlesBackground() {
+const ParticlesBackground = memo(function ParticlesBackground() {
     const [ready, setReady] = useState(false);
 
     useEffect(() => {
@@ -15,33 +16,39 @@ export default function ParticlesBackground() {
 
     const options = useMemo(
         () => ({
-            fullScreen: { enable: true, zIndex: 50 },
+            fullScreen: { enable: false },
             background: { color: { value: "transparent" } },
             fpsLimit: 120,
             interactivity: {
-                detectsOn: "window",
                 events: {
+                    onClick: {
+                        enable: true,
+                        mode: "push",
+                    },
                     onHover: {
-                        enable: false,
+                        enable: true,
+                        mode: "bubble",
                     },
                     resize: true,
                 },
                 modes: {
-                    repulse: {
-                        distance: 200,
-                        duration: 0.4,
-                        factor: 100,
-                        speed: 1,
-                        maxSpeed: 50,
+                    bubble: {
+                        distance: 400,
+                        duration: 2,
+                        opacity: 0.8,
+                        size: 40,
+                    },
+                    push: {
+                        quantity: 4,
                     },
                 },
             },
             particles: {
                 color: {
-                    value: ["#3b82f6", "#60a5fa", "#a78bfa"],
+                    value: ["#3b82f6", "#60a5fa", "#a78bfa", "#ec4899"],
                 },
                 links: {
-                    enable: false, // Google Antigravity style (no links)
+                    enable: false,
                 },
                 move: {
                     direction: "none",
@@ -50,7 +57,7 @@ export default function ParticlesBackground() {
                         default: "out",
                     },
                     random: true,
-                    speed: 1.5,
+                    speed: { min: 1, max: 3 },
                     straight: false,
                 },
                 number: {
@@ -58,16 +65,16 @@ export default function ParticlesBackground() {
                         enable: true,
                         area: 800,
                     },
-                    value: 120,
+                    value: 40, // Fewer but larger bubbles
                 },
                 opacity: {
-                    value: { min: 0.3, max: 0.8 },
+                    value: { min: 0.1, max: 0.3 },
                 },
                 shape: {
                     type: "circle",
                 },
                 size: {
-                    value: { min: 1, max: 4 },
+                    value: { min: 5, max: 15 }, // Larger circles like bubbles
                 },
             },
             detectRetina: true,
@@ -78,10 +85,29 @@ export default function ParticlesBackground() {
     if (!ready) return null;
 
     return (
-        <Particles
-            id="tsparticles"
-            options={options}
-            className="particles-background"
-        />
+        <Box sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            zIndex: 0,
+            pointerEvents: 'none'
+        }}>
+            <Particles
+                id="tsparticles"
+                options={options}
+                className="particles-background"
+                style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%'
+                }}
+            />
+        </Box>
     );
-}
+});
+
+export default ParticlesBackground;

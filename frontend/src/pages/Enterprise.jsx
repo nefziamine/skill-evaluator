@@ -55,7 +55,7 @@ export default function Enterprise() {
                                         variant="contained"
                                         color="secondary"
                                         size="large"
-                                        onClick={handleRestrictedAction}
+                                        onClick={() => navigate('/contact')}
                                         sx={{ px: 6, py: 2, borderRadius: 50, fontWeight: 800 }}
                                     >
                                         Contact Sales
@@ -63,7 +63,7 @@ export default function Enterprise() {
                                     <Button
                                         variant="outlined"
                                         size="large"
-                                        onClick={handleRestrictedAction}
+                                        onClick={() => navigate('/security')}
                                         sx={{ px: 6, py: 2, borderRadius: 50, fontWeight: 800, color: 'white', borderColor: alpha('#fff', 0.2) }}
                                     >
                                         View Security Whitepaper
@@ -148,7 +148,7 @@ export default function Enterprise() {
                                     variant="contained"
                                     color="secondary"
                                     size="large"
-                                    onClick={handleRestrictedAction}
+                                    onClick={() => navigate('/demo')}
                                     sx={{ px: 8, py: 2, borderRadius: 50, fontWeight: 800, fontSize: '1.2rem' }}
                                 >
                                     Book a Demo

@@ -13,6 +13,7 @@ import TestResults from './pages/TestResults'
 import CandidateResults from './pages/CandidateResults'
 import InviteHandler from './pages/InviteHandler'
 import CandidateProfile from './pages/CandidateProfile'
+import CandidateSetup from './pages/CandidateSetup'
 import SuccessResults from './pages/SuccessResults'
 import HowItWorksPage from './pages/HowItWorksPage'
 import BrowseTalent from './pages/BrowseTalent'
@@ -26,6 +27,10 @@ import Terms from './pages/Terms'
 import Privacy from './pages/Privacy'
 import Pricing from './pages/Pricing'
 import RecruiterBilling from './pages/RecruiterBilling'
+import Docs from './pages/Docs'
+import Security from './pages/Security'
+import Demo from './pages/Demo'
+import PublicJobs from './pages/PublicJobs'
 
 const darkTheme = createTheme({
   palette: {
@@ -96,6 +101,10 @@ function App() {
           <Route path="/how-it-works" element={<HowItWorksPage />} />
           <Route path="/ai-advanced" element={<AIAdvanced />} />
           <Route path="/pricing" element={<Pricing />} />
+          <Route path="/docs" element={<Docs />} />
+          <Route path="/security" element={<Security />} />
+          <Route path="/demo" element={<Demo />} />
+          <Route path="/jobs" element={<PublicJobs />} />
           <Route path="/talent" element={<BrowseTalent />} />
           <Route path="/post-job" element={<PostJob />} />
           <Route path="/enterprise" element={<Enterprise />} />
@@ -105,6 +114,7 @@ function App() {
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/invite/:token" element={<InviteHandler />} />
+          <Route path="/candidate/setup" element={<CandidateSetup />} />
           <Route
             path="/admin/dashboard"
             element={

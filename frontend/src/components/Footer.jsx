@@ -6,7 +6,7 @@ function Footer() {
     <Box
       component="footer"
       sx={{
-        bgcolor: '#020617',
+        bgcolor: 'transparent',
         borderTop: '1px solid',
         borderColor: alpha('#fff', 0.05),
         py: 8,
@@ -57,7 +57,9 @@ function Footer() {
             <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 700, mb: 2 }}>Company</Typography>
             <Stack spacing={1.5}>
               <Link href="/about" sx={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.9rem', transition: 'all 0.2s', '&:hover': { color: 'white', transform: 'translateX(5px)' } }}>About</Link>
-              <Link href="/careers" sx={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.9rem', transition: 'all 0.2s', '&:hover': { color: 'white', transform: 'translateX(5px)' } }}>Careers</Link>
+              <Link href="/docs" sx={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.9rem', transition: 'all 0.2s', '&:hover': { color: 'white', transform: 'translateX(5px)' } }}>Documentation</Link>
+              <Link href="/security" sx={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.9rem', transition: 'all 0.2s', '&:hover': { color: 'white', transform: 'translateX(5px)' } }}>Security</Link>
+              <Link href="/demo" sx={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.9rem', transition: 'all 0.2s', '&:hover': { color: 'white', transform: 'translateX(5px)' } }}>Book a Demo</Link>
               <Link href="/contact" sx={{ color: '#94a3b8', textDecoration: 'none', fontSize: '0.9rem', transition: 'all 0.2s', '&:hover': { color: 'white', transform: 'translateX(5px)' } }}>Contact</Link>
             </Stack>
           </Grid>

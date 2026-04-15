@@ -4,6 +4,7 @@ import com.skillevaluator.model.*;
 import com.skillevaluator.repository.*;
 import com.skillevaluator.security.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -561,6 +562,9 @@ public class RecruiterController {
                 "totalQuestions", totalQuestions));
     }
 
+    @Value("${app.frontend.url:http://localhost:5173}")
+    private String frontendUrl;
+
     @PostMapping("/invite-candidate")
     public ResponseEntity<?> inviteCandidate(@RequestBody Map<String, Object> inviteData) {
         String email = (String) inviteData.get("email");
@@ -595,7 +599,8 @@ public class RecruiterController {
         String token = tokenProvider.generateToken(candidate.getUsername(), "ROLE_CANDIDATE");
 
         // The invitation link
-        String inviteLink = "http://localhost:3000/invite/" + token + "?testId=" + testId;
+        String cleanUrl = frontendUrl.endsWith("/") ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl;
+        String inviteLink = cleanUrl + "/invite/" + token + "?testId=" + testId;
 
         // Send Email automatically
         emailService.sendInvitation(email, inviteLink, test.getTitle());
@@ -656,8 +661,9 @@ public class RecruiterController {
                         .anyMatch(a -> a.equals("ROLE_RECRUITER") || a.equals("ROLE_ADMIN"));
 
         List<User> candidates = userRepository.findAll().stream()
-                // Public directory: show ALL candidates across the platform
+                // Show candidates who have at least one completed test
                 .filter(u -> u.getRole() == Role.CANDIDATE)
+                .filter(u -> testSessionRepository.findByCandidate(u).stream().anyMatch(TestSession::getIsCompleted))
                 .toList();
 
         record TalentProfile(

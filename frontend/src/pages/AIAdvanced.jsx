@@ -142,7 +142,12 @@ export default function AIAdvanced() {
                             }}>
                                 Request Access
                             </Button>
-                            <Button variant="outlined" size="large" sx={{
+                            <Button 
+                                component={Link} 
+                                to="/docs"
+                                variant="outlined" 
+                                size="large" 
+                                sx={{
                                 px: 6,
                                 py: 2,
                                 borderRadius: 4,

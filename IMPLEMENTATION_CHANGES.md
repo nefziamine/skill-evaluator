@@ -170,6 +170,28 @@ This document details all the changes made to address the issues identified in t
 - API health checks
 - Backup status tracking
 
+### 13. Brevo Email Integration & Candidate Profiling
+**Files Modified:** 
+- `backend/src/main/resources/application.properties`
+- `docker-compose.yml`
+- `backend/src/main/java/com/skillevaluator/service/EmailService.java`
+- `backend/src/main/java/com/skillevaluator/controller/RecruiterController.java`
+- `frontend/src/pages/CandidateSetup.jsx`
+- `frontend/src/pages/InviteHandler.jsx`
+- `frontend/src/App.jsx`
+
+**Changes:**
+- Integrated Brevo REST API for robust transactional email delivery with fallback to JavaMailSender
+- Designed a premium, branded HTML email template for Candidate assessment invitations
+- Transformed the Candidate Setup page into a comprehensive Profile Completion form (capturing First/Last Name, Phone, and URLs for LinkedIn, GitHub, and Portfolio)
+- Updated mapping on `/candidate/setup` route and properly logged out recruiter sessions when tasting invite links
+- Modified the Talent Page (`/talent-browser`) to exclusively display candidates who have completed an assessment, keeping the talent pool qualified
+
+**Business Impact:**
+- Substantially improves the professional perception of the platform via branded emails
+- Captures essential candidate data prior to an assessment, filling out the candidate's portfolio natively
+- Validates the recruiter's candidate pipeline seamlessly
+
 ## Security Improvements
 
 ### Password Security
